@@ -1,0 +1,1 @@
+import{r as s,f as u,K as e}from"./index-Dq_WCc11.js";var f=e[" useId ".trim().toString()]||(()=>{}),c=0;function d(t){const[a,r]=s.useState(f());return u(()=>{t||r(o=>o??String(c++))},[t]),t||(a?`radix-${a}`:"")}export{d as u};

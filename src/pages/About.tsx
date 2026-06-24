@@ -1,6 +1,8 @@
 import { PublicLayout } from "@/components/PublicLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Target, Eye, Award, Users, TrendingUp, Globe, Lock } from "lucide-react";
+import { Shield, Target, Eye, Award, Users, TrendingUp, Globe, Lock, CheckCircle2, BookOpen, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 import heroAbout from "@/assets/hero-about.png";
 import { useAppSettings } from "@/hooks/useCmsData";
@@ -53,6 +55,45 @@ export default function About() {
         </div>
       </section>
 
+      {/* Why AssetVault Exists */}
+      <section className="py-16 bg-muted/30">
+        <div className="container max-w-5xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-3">Why AssetVault Exists</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">The investment landscape has long favored institutions and experienced traders. We built AssetVault to change that.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold">The Challenge</h3>
+                <p className="text-sm text-muted-foreground">Most retail investors lack access to the tools, strategies, and information that professional traders use. This creates an uneven playing field that disadvantages everyday investors.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold">Our Solution</h3>
+                <p className="text-sm text-muted-foreground">AssetVault bridges this gap by providing managed investment plans, copy trading, and professional-grade analytics — all in a simple, accessible platform.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold">The Result</h3>
+                <p className="text-sm text-muted-foreground">Over 25,000 investors across 120+ countries now use AssetVault to build diversified portfolios and grow their wealth with confidence.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 bg-muted/30">
         <div className="container grid md:grid-cols-2 gap-12">
           <div className="space-y-4">
@@ -66,16 +107,17 @@ export default function About() {
         </div>
       </section>
 
+      {/* Core Principles */}
       <section className="py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-4">Why AssetVault</h2>
-          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">We combine cutting-edge technology with decades of financial expertise to deliver a platform you can trust.</p>
+          <h2 className="text-3xl font-bold text-center mb-4">Core Principles</h2>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">The values that guide every decision we make as a company.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Shield, title: "Secure & Regulated", desc: "Bank-grade security with 256-bit encryption and full regulatory compliance across jurisdictions." },
-              { icon: Award, title: "Proven Track Record", desc: "Consistent returns across market conditions with transparent performance history for all plans." },
-              { icon: Target, title: "Expert Strategies", desc: "Access professional trading strategies managed by experienced analysts and portfolio managers." },
-              { icon: Eye, title: "Full Transparency", desc: "Real-time tracking of all investments with detailed reporting and no hidden fees." },
+              { icon: Eye, title: "Transparency", desc: "Every fee, return, and process is clearly documented. No hidden charges, no surprises. We believe trust is built through openness." },
+              { icon: Shield, title: "Security", desc: "Your funds and data are protected by multi-layer security including 256-bit encryption, 2FA, cold storage, and 24/7 monitoring." },
+              { icon: BookOpen, title: "Investor Education", desc: "We provide resources, guides, and support to help investors make informed decisions — regardless of their experience level." },
+              { icon: TrendingUp, title: "Long-Term Growth", desc: "We focus on sustainable, consistent returns rather than short-term speculation. Our plans are designed for steady wealth building." },
             ].map((f) => (
               <Card key={f.title}>
                 <CardContent className="p-6 text-center space-y-3">
@@ -127,6 +169,48 @@ export default function About() {
         </div>
       </section>
 
+      {/* Security Commitment */}
+      <section className="py-16">
+        <div className="container max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Our Security Commitment</h2>
+              <p className="text-muted-foreground mb-6">Security is not an afterthought — it's built into every layer of our platform. We invest heavily in protecting your account, your data, and your investments.</p>
+              <ul className="space-y-3">
+                {[
+                  "256-bit SSL encryption on all connections",
+                  "Cold storage for digital assets",
+                  "Segregated client fund accounts",
+                  "24/7 automated threat monitoring",
+                  "Regular third-party security audits",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6">
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/security">Visit Security Center <ArrowRight className="ml-2 h-3 w-3" /></Link>
+                </Button>
+              </div>
+            </div>
+            <Card className="bg-gradient-hero text-primary-foreground border-0">
+              <CardContent className="p-8 space-y-4 text-center">
+                <Shield className="h-14 w-14 mx-auto text-accent" />
+                <h3 className="text-xl font-bold">Bank-Grade Protection</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><div className="text-2xl font-bold text-accent">99.9%</div><div className="text-xs text-primary-foreground/60">Uptime</div></div>
+                  <div><div className="text-2xl font-bold text-accent">0</div><div className="text-xs text-primary-foreground/60">Data Breaches</div></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform in Numbers */}
       <section className="py-16 bg-muted/30">
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-10">Platform in Numbers</h2>

@@ -33,6 +33,9 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const BlogIndex = lazy(() => import("./pages/BlogIndex"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const SecurityCenter = lazy(() => import("./pages/SecurityCenter"));
+const TrustCenter = lazy(() => import("./pages/TrustCenter"));
+const Education = lazy(() => import("./pages/Education"));
 
 // Dashboard pages
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
@@ -111,6 +114,9 @@ const App = () => (
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
                   <Route path="/risk-disclosure" element={<RiskDisclosure />} />
+                  <Route path="/security" element={<SecurityCenter />} />
+                  <Route path="/trust" element={<TrustCenter />} />
+                  <Route path="/education" element={<Education />} />
                   
                   <Route path="/admin/login" element={<AdminLogin />} />
 

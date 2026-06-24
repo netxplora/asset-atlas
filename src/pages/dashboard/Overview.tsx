@@ -126,6 +126,94 @@ export default function DashboardOverview() {
           ))}
       </div>
 
+      {/* Trust Indicator Cards */}
+      <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
+        {/* Verification Status */}
+        <Card className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Verification</span>
+              {!profileLoading && profile?.kyc_status === "verified" ? (
+                <Badge className="bg-success/10 text-success border-0 text-[10px]">Verified</Badge>
+              ) : !profileLoading && profile?.kyc_status === "pending" ? (
+                <Badge className="bg-warning/10 text-warning border-0 text-[10px]">Pending</Badge>
+              ) : (
+                <Badge className="bg-muted text-muted-foreground border-0 text-[10px]">Incomplete</Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${profile?.kyc_status === "verified" ? "bg-success/10" : "bg-warning/10"}`}>
+                <ShieldCheck className={`h-4 w-4 ${profile?.kyc_status === "verified" ? "text-success" : "text-warning"}`} />
+              </div>
+              <div>
+                <div className="font-semibold text-sm">{profile?.kyc_status === "verified" ? "Identity Verified" : "Verify Your Identity"}</div>
+                <div className="text-[11px] text-muted-foreground">{profile?.kyc_status === "verified" ? "Your account is fully verified" : "Required for withdrawals"}</div>
+              </div>
+            </div>
+            {profile?.kyc_status !== "verified" && (
+              <Link to="/dashboard/profile" className="text-xs text-primary hover:underline mt-3 block font-medium">Complete Verification →</Link>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Account Security */}
+        <Card className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Security</span>
+              <Badge className="bg-success/10 text-success border-0 text-[10px]">Active</Badge>
+            </div>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">Password</span>
+                <span className="text-xs font-medium text-success flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Set</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">2FA</span>
+                <span className="text-xs font-medium text-muted-foreground">Not enabled</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">Last Login</span>
+                <span className="text-xs font-medium">{new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+            <Link to="/dashboard/profile" className="text-xs text-primary hover:underline mt-3 block font-medium">Manage Security →</Link>
+          </CardContent>
+        </Card>
+
+        {/* Portfolio Health */}
+        <Card className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Portfolio Health</span>
+              <Badge className={`border-0 text-[10px] ${activeInvestments.length > 0 ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                {activeInvestments.length > 0 ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">Diversification</span>
+                <span className="text-xs font-medium">
+                  {(() => {
+                    const types = new Set(activeInvestments.map((inv: any) => inv.plans?.category).filter(Boolean));
+                    return types.size >= 3 ? "High" : types.size >= 2 ? "Medium" : types.size === 1 ? "Low" : "None";
+                  })()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">Active Plans</span>
+                <span className="text-xs font-medium">{activeInvestments.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">Est. Earnings</span>
+                <span className="text-xs font-medium text-success">${totalEarned.toFixed(2)}</span>
+              </div>
+            </div>
+            <Link to="/dashboard/portfolio" className="text-xs text-primary hover:underline mt-3 block font-medium">View Portfolio →</Link>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">

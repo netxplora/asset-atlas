@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { PublicLayout } from "@/components/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   TrendingUp, Shield, BarChart3, Users, ArrowRight, Star,
   Globe, Wallet, Copy, ChevronRight, Smartphone, CheckCircle2,
-  Lock, Zap, PieChart, Clock, Award, Headphones
+  Lock, Zap, PieChart, Clock, Award, Headphones,
+  ShieldCheck, UserCheck, Banknote, Eye, FileCheck, HelpCircle,
 } from "lucide-react";
 import heroMain from "@/assets/hero-main.jpg";
 import heroSlide2 from "@/assets/hero-slide-2.png";
@@ -37,33 +42,65 @@ const stats = [
   { label: "Countries Supported", value: "120+", icon: Globe },
 ];
 
+const trustBar = [
+  { label: "SSL Secured", icon: Lock },
+  { label: "Encrypted Transactions", icon: ShieldCheck },
+  { label: "Verified Accounts", icon: UserCheck },
+  { label: "24/7 Support", icon: Headphones },
+  { label: "25,000+ Global Investors", icon: Globe },
+];
+
 const categories = [
   { title: "Forex", desc: "Trade major, minor, and exotic currency pairs with competitive spreads and expert-managed plans.", image: heroForex },
   { title: "Crypto", desc: "Invest in Bitcoin, Ethereum, and top altcoins with institutional-grade security and diversified strategies.", image: heroCrypto },
   { title: "Commodities", desc: "Diversify with Gold, Silver, Oil and other physical assets for long-term wealth preservation.", image: heroCommodities },
 ];
 
+const howItWorks = [
+  { step: "1", title: "Create Account", desc: "Sign up in minutes with a simple registration process.", icon: Users },
+  { step: "2", title: "Verify Identity", desc: "Complete KYC verification with a valid government-issued ID.", icon: UserCheck },
+  { step: "3", title: "Fund Account", desc: "Deposit funds via crypto, bank transfer, or supported methods.", icon: Banknote },
+  { step: "4", title: "Choose Strategy", desc: "Select an investment plan or copy a professional trader.", icon: BarChart3 },
+  { step: "5", title: "Track Portfolio", desc: "Monitor your portfolio performance with real-time analytics.", icon: Eye },
+  { step: "6", title: "Withdraw Earnings", desc: "Request withdrawals anytime — processed within 1-3 business days.", icon: Wallet },
+];
+
 const features = [
   { title: "Copy Trading", desc: "Mirror professional traders automatically and earn consistent returns without trading experience.", icon: Copy },
-  { title: "Smart Portfolio", desc: "AI-powered portfolio management tools that optimize your asset allocation in real time.", icon: BarChart3 },
+  { title: "Smart Portfolio", desc: "Portfolio management tools that optimize your asset allocation in real time.", icon: BarChart3 },
   { title: "Bank-Grade Security", desc: "256-bit encryption, 2FA protection, and cold storage for digital assets.", icon: Shield },
   { title: "24/7 Support", desc: "Round-the-clock customer assistance via live chat, email, and phone.", icon: Headphones },
-  { title: "Fast Withdrawals", desc: "Process withdrawals within 24 hours with multiple payment methods available.", icon: Zap },
+  { title: "Fast Withdrawals", desc: "Process withdrawals within 1-3 business days with multiple payment methods.", icon: Zap },
   { title: "Real-time Analytics", desc: "Track your portfolio performance with detailed charts and ROI breakdowns.", icon: PieChart },
 ];
 
-const testimonials = [
-  { name: "James W.", role: "Forex Investor", text: "AssetVault's copy trading feature helped me earn consistent returns without needing to trade myself. The platform is incredibly professional.", rating: 5, verified: true },
-  { name: "Sarah L.", role: "Crypto Investor", text: "The platform is incredibly intuitive. I've been investing in crypto plans for 6 months with great results. Customer support is outstanding.", rating: 5, verified: true },
-  { name: "Michael R.", role: "Commodities Investor", text: "Professional platform with excellent ROI tracking. My gold investments have performed exceptionally well even during market volatility.", rating: 5, verified: true },
-  { name: "Emily T.", role: "Forex Investor", text: "I switched from another platform and immediately noticed the difference. Clean interface, transparent fees, and reliable returns.", rating: 5, verified: true },
+const confidenceItems = [
+  { icon: Lock, title: "Account Security", desc: "Your account is protected by 256-bit SSL encryption, optional two-factor authentication, and session monitoring. We detect and block unauthorized access attempts automatically." },
+  { icon: Banknote, title: "Fund Protection", desc: "Client funds are held in segregated accounts, separate from company operating funds. Your investment capital is protected and accounted for at all times." },
+  { icon: UserCheck, title: "Identity Verification", desc: "Our KYC process verifies every investor's identity to prevent fraud and protect the platform community. Verification typically completes within 24 hours." },
+  { icon: Zap, title: "Withdrawal Guarantees", desc: "Withdrawal requests are processed within 1-3 business days after approval. There are no hidden fees or lockup periods on your available balance." },
+  { icon: ShieldCheck, title: "Regulatory Compliance", desc: "AssetVault operates in compliance with international financial regulations and anti-money laundering (AML) standards." },
+  { icon: Headphones, title: "Dedicated Support", desc: "Our support team is available 24/7 via email, live chat, and phone to assist with any account-related questions or concerns." },
 ];
 
-const howItWorks = [
-  { step: "1", title: "Create Account", desc: "Sign up in minutes with a simple registration process and complete your KYC verification." },
-  { step: "2", title: "Fund Your Account", desc: "Deposit funds via bank transfer, cryptocurrency, or other supported payment methods." },
-  { step: "3", title: "Choose Your Strategy", desc: "Select an investment plan or copy a professional trader that matches your goals." },
-  { step: "4", title: "Earn Returns", desc: "Monitor your portfolio grow with real-time tracking and receive your ROI on schedule." },
+const testimonials = [
+  { name: "James W.", role: "Forex Investor", country: "United States", text: "AssetVault's copy trading feature helped me earn consistent returns without needing to trade myself. The platform is incredibly professional.", rating: 5, verified: true },
+  { name: "Sarah L.", role: "Crypto Investor", country: "United Kingdom", text: "The platform is incredibly intuitive. I've been investing in crypto plans for 6 months with great results. Customer support is outstanding.", rating: 5, verified: true },
+  { name: "Michael R.", role: "Commodities Investor", country: "Canada", text: "Professional platform with excellent ROI tracking. My gold investments have performed exceptionally well even during market volatility.", rating: 5, verified: true },
+  { name: "Emily T.", role: "Forex Investor", country: "Australia", text: "I switched from another platform and immediately noticed the difference. Clean interface, transparent fees, and reliable returns.", rating: 5, verified: true },
+  { name: "Daniel O.", role: "Crypto Investor", country: "Germany", text: "The withdrawal process is smooth and fast. I received my funds within 2 business days. Very trustworthy platform.", rating: 5, verified: true },
+  { name: "Priya K.", role: "Copy Trading", country: "India", text: "Copy trading made investing accessible for me. I follow two professional traders and have seen steady growth in my portfolio.", rating: 5, verified: true },
+  { name: "Robert M.", role: "Diversified Investor", country: "South Africa", text: "I invest across Forex, Crypto, and Commodities on AssetVault. The diversification tools and portfolio analytics are excellent.", rating: 5, verified: true },
+  { name: "Yuki H.", role: "Forex Investor", country: "Japan", text: "The account verification was quick and the deposit process is straightforward. I appreciate the transparency in fee structure.", rating: 5, verified: true },
+];
+
+const homepageFaqs = [
+  { q: "What is AssetVault?", a: "AssetVault is a digital asset brokerage platform that allows you to invest in Forex, Crypto, and Commodities through managed investment plans and copy trading. We connect you with professional traders and expertly managed portfolios." },
+  { q: "How much do I need to start investing?", a: "Minimum investments vary by plan. Forex starts at $100, Crypto at $250, and Commodities at $500 for Starter plans. Higher tiers offer better returns with larger minimum investments." },
+  { q: "Is my money safe on AssetVault?", a: "Yes. We use 256-bit encryption, optional 2FA, and cold storage for digital assets. Client funds are held in segregated accounts separate from company operations. We comply with international financial regulations." },
+  { q: "How do withdrawals work?", a: "You can withdraw your available balance at any time through your dashboard. KYC verification is required. Withdrawal requests are processed within 1-3 business days depending on the method." },
+  { q: "What is copy trading?", a: "Copy trading lets you automatically mirror the trades of professional traders on the platform. You select a trader, set your investment amount, and the system copies their trades proportionally. No trading experience is needed." },
+  { q: "How do I verify my account?", a: "After registration, go to your Profile settings and upload a valid government-issued ID along with proof of address. Verification is typically completed within 24 hours by our compliance team." },
 ];
 
 import { SEOHead } from "@/components/SEOHead";
@@ -71,20 +108,22 @@ import { SEOHead } from "@/components/SEOHead";
 export default function Index() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { data: homeData } = useAppSettings("homepage_content");
-  
+  const { user } = useAuth();
+  const investLink = user ? "/dashboard/investments" : "/register";
+
   // Provide defaults
   const content = {
     hero_title: homeData?.hero_title || "Your Gateway to",
     hero_highlight: homeData?.hero_highlight || "Smart Investing",
     hero_subtitle: homeData?.hero_subtitle || "Invest in Forex, Crypto, and Commodities with professional-grade tools, copy trading, and managed investment plans designed for maximum returns.",
-    cta_title: homeData?.cta_title || "Ready to Start Investing?",
+    cta_title: homeData?.cta_title || "Ready to Start Building Your Investment Portfolio?",
     cta_subtitle: homeData?.cta_subtitle || "Join thousands of investors already growing their wealth with AssetVault. Create your free account and start earning today."
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -138,7 +177,7 @@ export default function Index() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
               <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
-                <Link to="/register">Start Investing <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to={investLink}>Start Investing <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
                 <Link to="/plans">View Plans</Link>
@@ -148,12 +187,25 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Trust Bar */}
+      <section className="border-b bg-background">
+        <div className="container py-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            {trustBar.map((item) => (
+              <div key={item.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <item.icon className="h-4 w-4 text-success shrink-0" />
+                <span className="font-medium">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Market Ticker */}
       <div className="bg-muted border-b overflow-hidden relative py-3 group">
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted to-transparent z-10"></div>
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted to-transparent z-10"></div>
         <div className="flex animate-marquee group-hover:[animation-play-state:paused] whitespace-nowrap">
-          {/* Double the array for seamless scrolling */}
           {[...cryptoTicker, ...cryptoTicker, ...cryptoTicker].map((item, i) => (
             <div key={i} className="inline-flex items-center gap-2 mx-6 text-sm">
               <span className="font-bold">{item.pair}</span>
@@ -182,7 +234,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Investment Categories with images */}
+      {/* Investment Categories */}
       <section className="py-16 lg:py-20">
         <div className="container">
           <div className="text-center mb-12">
@@ -208,19 +260,19 @@ export default function Index() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* How It Works — 6 Steps */}
       <section className="py-16 bg-muted/30">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">How It Works</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Get started with AssetVault in four simple steps and begin your investment journey today.</p>
+            <h2 className="text-3xl font-bold mb-3">How AssetVault Works</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">Get started in six simple steps — from account creation to earning returns on your investments.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {howItWorks.map((item) => (
-              <div key={item.step} className="text-center space-y-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {howItWorks.map((item, i) => (
+              <div key={item.step} className="relative text-center space-y-3 animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
                 <div className="w-14 h-14 rounded-full bg-gradient-primary flex items-center justify-center mx-auto text-primary-foreground font-bold text-xl">{item.step}</div>
                 <h3 className="font-semibold text-lg">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -268,11 +320,11 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Why Choose AssetVault */}
       <section className="py-16 lg:py-20 bg-muted/30">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Why Choose AssetVault</h2>
+            <h2 className="text-3xl font-bold mb-3">Why Investors Choose AssetVault</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">Built for serious investors who demand performance, security, and simplicity in their investment journey.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -291,20 +343,15 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Security */}
+      {/* Investor Confidence */}
       <section className="py-16">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
               <h2 className="text-3xl font-bold mb-4">Your Security Is Our Priority</h2>
-              <p className="text-muted-foreground mb-6">We employ industry-leading security measures to protect your funds and personal data at every level.</p>
-              <div className="space-y-4">
-                {[
-                  { icon: Lock, title: "256-bit Encryption", desc: "All data is encrypted using bank-grade SSL technology" },
-                  { icon: Shield, title: "2FA Authentication", desc: "Optional two-factor authentication for enhanced account security" },
-                  { icon: Award, title: "Regulatory Compliance", desc: "Fully compliant with international financial regulations" },
-                  { icon: Clock, title: "24/7 Monitoring", desc: "Round-the-clock system monitoring for suspicious activity" },
-                ].map((item) => (
+              <p className="text-muted-foreground mb-8">We employ industry-leading security measures to protect your funds and personal data at every level. Here's how we keep your account and investments safe.</p>
+              <div className="space-y-5">
+                {confidenceItems.slice(0, 3).map((item) => (
                   <div key={item.title} className="flex gap-4">
                     <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
                       <item.icon className="h-5 w-5 text-primary" />
@@ -317,25 +364,43 @@ export default function Index() {
                 ))}
               </div>
             </div>
-            <Card className="bg-gradient-hero text-primary-foreground border-0">
-              <CardContent className="p-8 space-y-6">
-                <Shield className="h-16 w-16 text-accent" />
-                <h3 className="text-2xl font-bold">Bank-Grade Protection</h3>
-                <p className="text-primary-foreground/80">Your funds are protected by multi-layer security protocols, including cold storage for digital assets and segregated client accounts.</p>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div><div className="text-2xl font-bold text-accent">99.9%</div><div className="text-xs text-primary-foreground/60">Uptime</div></div>
-                  <div><div className="text-2xl font-bold text-accent">0</div><div className="text-xs text-primary-foreground/60">Security Breaches</div></div>
-                </div>
-              </CardContent>
-            </Card>
+            <div>
+              <Card className="bg-gradient-hero text-primary-foreground border-0 mb-6">
+                <CardContent className="p-8 space-y-6">
+                  <Shield className="h-16 w-16 text-accent" />
+                  <h3 className="text-2xl font-bold">Bank-Grade Protection</h3>
+                  <p className="text-primary-foreground/80">Your funds are protected by multi-layer security protocols, including cold storage for digital assets and segregated client accounts.</p>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div><div className="text-2xl font-bold text-accent">99.9%</div><div className="text-xs text-primary-foreground/60">Uptime</div></div>
+                    <div><div className="text-2xl font-bold text-accent">0</div><div className="text-xs text-primary-foreground/60">Security Breaches</div></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="space-y-5">
+                {confidenceItems.slice(3).map((item) => (
+                  <div key={item.title} className="flex gap-4">
+                    <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials — 8 */}
       <section className="py-16 bg-muted/30">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-10">What Our Investors Say</h2>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-3">What Our Investors Say</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">Real feedback from verified investors around the world.</p>
+          </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {testimonials.map((t) => (
               <Card key={t.name}>
@@ -356,7 +421,7 @@ export default function Index() {
                           {t.name}
                           {t.verified && <CheckCircle2 className="h-3.5 w-3.5 text-success" />}
                         </div>
-                        <div className="text-xs text-muted-foreground">{t.role}</div>
+                        <div className="text-xs text-muted-foreground">{t.role} • {t.country}</div>
                       </div>
                     </div>
                   </div>
@@ -367,8 +432,38 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Download App */}
+      {/* Homepage FAQ */}
       <section className="py-16">
+        <div className="container max-w-3xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-3">Common Questions</h2>
+            <p className="text-muted-foreground">Quick answers to help you get started with confidence.</p>
+          </div>
+          <Accordion type="single" collapsible className="space-y-3">
+            {homepageFaqs.map((faq, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="border rounded-lg px-4 data-[state=open]:bg-muted/30">
+                <AccordionTrigger className="text-sm font-medium hover:no-underline py-4">
+                  <span className="flex items-center gap-2 text-left">
+                    <HelpCircle className="h-4 w-4 text-primary shrink-0" />
+                    {faq.q}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground pb-4 pl-6">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+          <div className="text-center mt-8">
+            <Button variant="outline" asChild>
+              <Link to="/faq">View All FAQs <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Download App */}
+      <section className="py-16 bg-muted/30">
         <div className="container">
           <Card className="bg-gradient-hero text-primary-foreground border-0">
             <CardContent className="p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-8">
@@ -394,14 +489,19 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 bg-muted/30">
+      {/* Final CTA */}
+      <section className="py-16">
         <div className="container text-center space-y-5">
           <h2 className="text-3xl font-bold">{content.cta_title}</h2>
           <p className="text-muted-foreground max-w-lg mx-auto">{content.cta_subtitle}</p>
-          <Button size="lg" asChild>
-            <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button size="lg" asChild>
+              <Link to={investLink}>{user ? "Go to Investments" : "Create Free Account"} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link to="/plans">Explore Plans</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </PublicLayout>

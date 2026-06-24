@@ -2,7 +2,7 @@ import { PublicLayout } from "@/components/PublicLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Target, Eye, Award, Users, TrendingUp, Globe, Lock } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
-import heroAbout from "@/assets/hero-about.jpg";
+import heroAbout from "@/assets/hero-about.png";
 import { useAppSettings } from "@/hooks/useCmsData";
 
 const team = [

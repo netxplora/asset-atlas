@@ -1,6 +1,7 @@
 import { PublicLayout } from "@/components/PublicLayout";
 import { useCmsPageBySlug } from "@/hooks/useCmsData";
 import { Loader2 } from "lucide-react";
+import heroLegal from "@/assets/hero-legal.png";
 
 export default function PrivacyPolicy() {
   const { data: page, isLoading } = useCmsPageBySlug("privacy-policy");
@@ -17,12 +18,16 @@ export default function PrivacyPolicy() {
 
   return (
     <PublicLayout>
-      <section className="bg-muted py-16 md:py-20 border-b">
-        <div className="container max-w-4xl animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-primary">
+      <section className="relative min-h-[320px] flex items-center">
+        <div className="absolute inset-0">
+          <img src={heroLegal} alt="Privacy Policy" className="w-full h-full object-cover" width={1920} height={640} />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
+        </div>
+        <div className="container max-w-4xl relative z-10 py-16 md:py-20 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-white">
             {page?.title || "Privacy Policy"}
           </h1>
-          <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-background text-muted-foreground shadow-sm">
+          <div className="inline-flex items-center rounded-full border border-white/20 px-3 py-1 text-sm font-medium bg-white/10 text-white/80 backdrop-blur-sm shadow-sm">
             Last updated: {page?.updated_at ? new Date(page.updated_at).toLocaleDateString() : "April 8, 2026"}
           </div>
         </div>

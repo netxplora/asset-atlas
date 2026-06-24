@@ -2,13 +2,14 @@ import { PublicLayout } from "@/components/PublicLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import heroFaq from "@/assets/hero-faq.jpg";
 
-import { Search, SearchX } from "lucide-react";
+import { Search, SearchX, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCmsFaqs } from "@/hooks/useCmsData";
 
-const faqs = [
+const defaultFaqs = [
   { q: "What is AssetVault?", a: "AssetVault is a digital asset brokerage platform that allows you to invest in Forex, Crypto, and Commodities through managed investment plans and copy trading. We connect you with professional traders and expertly managed portfolios.", category: "general" },
   { q: "How does copy trading work?", a: "You select a professional trader, meet the minimum balance requirement, and our platform automatically mirrors their trades in your account. You earn proportional returns based on their performance. It's fully automated — no trading experience required.", category: "trading" },
   { q: "What is the minimum investment?", a: "Minimum investments vary by plan. Forex starts at $100, Crypto at $250, and Commodities at $500 for Starter plans. Higher tiers offer better returns with larger minimum investments.", category: "investments" },
@@ -24,14 +25,21 @@ const faqs = [
 export default function FAQ() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  
+  const { data: dbFaqs = [], isLoading } = useCmsFaqs(false);
+
+  // Use database FAQs if they exist, otherwise fallback to default hardcoded FAQs
+  const activeFaqs = dbFaqs.length > 0 
+    ? dbFaqs.map(f => ({ q: f.question, a: f.answer, category: f.category || "general" }))
+    : defaultFaqs;
 
   const filteredFaqs = useMemo(() => {
-    return faqs.filter(f => {
+    return activeFaqs.filter(f => {
       const matchesSearch = f.q.toLowerCase().includes(searchQuery.toLowerCase()) || f.a.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeTab === "all" || f.category === activeTab;
+      const matchesCategory = activeTab === "all" || f.category.toLowerCase() === activeTab.toLowerCase();
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, activeTab]);
+  }, [searchQuery, activeTab, activeFaqs]);
 
   return (
     <PublicLayout>

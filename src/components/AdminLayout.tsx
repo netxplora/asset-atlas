@@ -3,7 +3,7 @@ import { useState } from "react";
 import { 
   LayoutDashboard, Users, TrendingUp, Copy, History, 
   Shield, Settings, LogOut, Menu, Wallet, ArrowDownToLine, MessageCircle,
-  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft
+  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft, FileText, Scale
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,11 @@ const navGroups = [
     label: "System",
     items: [
       { label: "Audit Logs", to: "/admin/audit", icon: History },
+      { label: "Content & Pages", to: "/admin/content", icon: Copy },
+      { label: "Blog Posts", to: "/admin/blog", icon: FileText },
+      { label: "FAQs & Announce", to: "/admin/faqs", icon: MessageCircle },
+      { label: "Legal Documents", to: "/admin/legal", icon: Scale },
+      { label: "Brand & CMS", to: "/admin/brand", icon: Settings },
       { label: "Settings", to: "/admin/settings", icon: Settings },
     ],
   },

@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Target, Eye, Award, Users, TrendingUp, Globe, Lock } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import heroAbout from "@/assets/hero-about.jpg";
+import { useAppSettings } from "@/hooks/useCmsData";
 
 const team = [
   { name: "Richard Wells", role: "CEO & Founder", desc: "20+ years in institutional finance", image: "https://i.pravatar.cc/150?img=11" },
@@ -19,6 +20,16 @@ const milestones = [
 ];
 
 export default function About() {
+  const { data: aboutData } = useAppSettings("about_content");
+  
+  const content = {
+    hero_title: aboutData?.hero_title || "About AssetVault",
+    hero_subtitle: aboutData?.hero_subtitle || "We're a global asset manager and technology provider dedicated to helping more and more people experience financial well being.",
+    intro_text: aboutData?.intro_text || "We help millions of people invest to build savings that serve them throughout their lives. As a trusted digital asset brokerage platform, we empower investors worldwide to grow their wealth through Forex, Crypto, and Commodities — with transparency, security, and innovation at our core.",
+    mission_text: aboutData?.mission_text || "To democratize access to professional-grade investment tools and strategies, enabling anyone — regardless of experience level — to build wealth through diversified digital assets. We believe everyone deserves access to the same opportunities previously reserved for institutional investors.",
+    vision_text: aboutData?.vision_text || "To become the world's most trusted digital asset brokerage, known for transparency, innovation, and exceptional investor outcomes. We envision a future where smart investing is accessible, secure, and straightforward for everyone globally."
+  };
+
   return (
     <PublicLayout>
       <SEOHead title="About Us" description="Learn about AssetVault's mission, vision, and the leadership team driving innovation in digital asset management." path="/about" />
@@ -28,8 +39,8 @@ export default function About() {
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
         </div>
         <div className="container relative z-10 py-16 text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">About AssetVault</h1>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg">We're a global asset manager and technology provider dedicated to helping more and more people experience financial well being.</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">{content.hero_title}</h1>
+          <p className="text-white/80 max-w-2xl mx-auto text-lg">{content.hero_subtitle}</p>
         </div>
       </section>
 
@@ -37,7 +48,7 @@ export default function About() {
       <section className="py-16">
         <div className="container max-w-3xl text-center space-y-4">
           <p className="text-lg text-muted-foreground leading-relaxed">
-            We help millions of people invest to build savings that serve them throughout their lives. As a trusted digital asset brokerage platform, we empower investors worldwide to grow their wealth through Forex, Crypto, and Commodities — with transparency, security, and innovation at our core.
+            {content.intro_text}
           </p>
         </div>
       </section>
@@ -46,11 +57,11 @@ export default function About() {
         <div className="container grid md:grid-cols-2 gap-12">
           <div className="space-y-4">
             <div className="flex items-center gap-3"><Target className="h-6 w-6 text-primary" /><h2 className="text-2xl font-bold">Our Mission</h2></div>
-            <p className="text-muted-foreground">To democratize access to professional-grade investment tools and strategies, enabling anyone — regardless of experience level — to build wealth through diversified digital assets. We believe everyone deserves access to the same opportunities previously reserved for institutional investors.</p>
+            <p className="text-muted-foreground">{content.mission_text}</p>
           </div>
           <div className="space-y-4">
             <div className="flex items-center gap-3"><Eye className="h-6 w-6 text-accent" /><h2 className="text-2xl font-bold">Our Vision</h2></div>
-            <p className="text-muted-foreground">To become the world's most trusted digital asset brokerage, known for transparency, innovation, and exceptional investor outcomes. We envision a future where smart investing is accessible, secure, and straightforward for everyone globally.</p>
+            <p className="text-muted-foreground">{content.vision_text}</p>
           </div>
         </div>
       </section>

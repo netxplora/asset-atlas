@@ -12,6 +12,8 @@ import { SkipToContent } from "@/components/SkipToContent";
 import { BackToTop } from "@/components/BackToTop";
 import { ProtectedAdminRoute } from "@/components/ProtectedAdminRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { BrandProvider } from "@/components/BrandProvider";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 
 // Lazy-loaded page imports for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -29,6 +31,8 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const RiskDisclosure = lazy(() => import("./pages/RiskDisclosure"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const BlogIndex = lazy(() => import("./pages/BlogIndex"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 
 // Dashboard pages
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
@@ -55,8 +59,13 @@ const AdminWithdrawals = lazy(() => import("./pages/admin/Withdrawals"));
 const AdminWallets = lazy(() => import("./pages/admin/Wallets"));
 const AdminKYC = lazy(() => import("./pages/admin/KYC"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
+const AdminBrand = lazy(() => import("./pages/admin/Brand"));
+const AdminContent = lazy(() => import("./pages/admin/Content"));
+const AdminBlogs = lazy(() => import("./pages/admin/Blogs"));
+const AdminFAQs = lazy(() => import("./pages/admin/FAQs"));
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
 const AdminSupport = lazy(() => import("./pages/admin/Support"));
+const AdminLegalDocs = lazy(() => import("./pages/admin/LegalDocs"));
 
 const queryClient = new QueryClient();
 
@@ -75,80 +84,90 @@ const App = () => (
   <HelmetProvider>
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <SkipToContent />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/plans" element={<Plans />} />
-                <Route path="/copy-trading" element={<CopyTrading />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/risk-disclosure" element={<RiskDisclosure />} />
-                
-                <Route path="/admin/login" element={<AdminLogin />} />
+      <BrandProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <SkipToContent />
+            <AnnouncementBanner />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/plans" element={<Plans />} />
+                  <Route path="/copy-trading" element={<CopyTrading />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/blog" element={<BlogIndex />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/risk-disclosure" element={<RiskDisclosure />} />
+                  
+                  <Route path="/admin/login" element={<AdminLogin />} />
 
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<DashboardOverview />} />
-                  <Route path="investments" element={<Investments />} />
-                  <Route path="copy-trading" element={<DashboardCopyTrading />} />
-                  <Route path="deposit" element={<Deposit />} />
-                  <Route path="withdraw" element={<Withdraw />} />
-                  <Route path="portfolio" element={<Portfolio />} />
-                  <Route path="transactions" element={<Transactions />} />
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="notifications" element={<Notifications />} />
-                </Route>
+                  <Route 
+                    path="/dashboard" 
+                    element={
+                      <ProtectedRoute>
+                        <DashboardLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<DashboardOverview />} />
+                    <Route path="investments" element={<Investments />} />
+                    <Route path="copy-trading" element={<DashboardCopyTrading />} />
+                    <Route path="deposit" element={<Deposit />} />
+                    <Route path="withdraw" element={<Withdraw />} />
+                    <Route path="portfolio" element={<Portfolio />} />
+                    <Route path="transactions" element={<Transactions />} />
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="notifications" element={<Notifications />} />
+                  </Route>
 
-                <Route 
-                  path="/admin" 
-                  element={
-                    <ProtectedAdminRoute>
-                      <AdminLayout />
-                    </ProtectedAdminRoute>
-                  }
-                >
-                  <Route index element={<AdminOverview />} />
-                  <Route path="users" element={<AdminUsers />} />
-                  <Route path="audit" element={<AdminAuditLogs />} />
-                  <Route path="plans" element={<AdminPlans />} />
-                  <Route path="traders" element={<AdminTraders />} />
-                  <Route path="transactions" element={<AdminTransactions />} />
-                  <Route path="deposits" element={<AdminDeposits />} />
-                  <Route path="withdrawals" element={<AdminWithdrawals />} />
-                  <Route path="wallets" element={<AdminWallets />} />
-                  <Route path="kyc" element={<AdminKYC />} />
-                  <Route path="settings" element={<AdminSettings />} />
-                  <Route path="support" element={<AdminSupport />} />
-                </Route>
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminLayout />
+                      </ProtectedAdminRoute>
+                    }
+                  >
+                    <Route index element={<AdminOverview />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="audit" element={<AdminAuditLogs />} />
+                    <Route path="plans" element={<AdminPlans />} />
+                    <Route path="traders" element={<AdminTraders />} />
+                    <Route path="transactions" element={<AdminTransactions />} />
+                    <Route path="deposits" element={<AdminDeposits />} />
+                    <Route path="withdrawals" element={<AdminWithdrawals />} />
+                    <Route path="wallets" element={<AdminWallets />} />
+                    <Route path="kyc" element={<AdminKYC />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                    <Route path="brand" element={<AdminBrand />} />
+                    <Route path="content" element={<AdminContent />} />
+                    <Route path="blog" element={<AdminBlogs />} />
+                    <Route path="faqs" element={<AdminFAQs />} />
+                    <Route path="legal" element={<AdminLegalDocs />} />
+                    <Route path="support" element={<AdminSupport />} />
+                  </Route>
 
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-            <BackToTop />
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+                <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+              <BackToTop />
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </BrandProvider>
     </QueryClientProvider>
   </ThemeProvider>
   </HelmetProvider>

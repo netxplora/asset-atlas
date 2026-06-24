@@ -14,5 +14,6 @@ DROP FUNCTION IF EXISTS public.make_me_admin();
 -- Original policy had swapped arguments: has_role('admin', auth.uid())
 -- Correct signature is: has_role(_user_id UUID, _role app_role)
 DROP POLICY IF EXISTS "Enable all metadata access for admins" ON public.investment_plans;
+DROP POLICY IF EXISTS "Admins can manage investment plans" ON public.investment_plans;
 CREATE POLICY "Admins can manage investment plans" ON public.investment_plans
   FOR ALL USING (public.has_role(auth.uid(), 'admin'));

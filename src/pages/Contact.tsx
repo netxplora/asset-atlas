@@ -9,11 +9,20 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
 import heroContact from "@/assets/hero-contact.jpg";
+import { useCmsBrandSettings, useAppSettings } from "@/hooks/useCmsData";
 
 export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
+  const { data: brand } = useCmsBrandSettings();
+  const { data: contactData } = useAppSettings("contact_content");
+
+  const content = {
+    hero_title: contactData?.hero_title || "Contact Us",
+    hero_subtitle: contactData?.hero_subtitle || "Have questions? Our team is here to help you with anything you need.",
+    business_hours: contactData?.business_hours || "Mon-Fri: 9AM - 6PM EST"
+  };
 
   const validateForm = (formData: FormData) => {
     const newErrors: { [key: string]: string } = {};
@@ -23,7 +32,7 @@ export default function Contact() {
     const message = formData.get("message") as string;
 
     if (!name || name.trim().length < 2) newErrors.name = "Name must be at least 2 characters.";
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Please enter a valid email address.";
+    if (!email || !/^\\S+@\\S+\\.\\S+$/.test(email)) newErrors.email = "Please enter a valid email address.";
     if (!subject || subject.trim().length < 5) newErrors.subject = "Subject must be at least 5 characters.";
     if (!message || message.trim().length < 10) newErrors.message = "Message must be at least 10 characters.";
 
@@ -55,8 +64,8 @@ export default function Contact() {
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
         </div>
         <div className="container relative z-10 py-16 text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">Contact Us</h1>
-          <p className="text-white/80 max-w-xl mx-auto text-lg">Have questions? Our team is here to help you with anything you need.</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">{content.hero_title}</h1>
+          <p className="text-white/80 max-w-xl mx-auto text-lg">{content.hero_subtitle}</p>
         </div>
       </section>
 
@@ -64,10 +73,10 @@ export default function Contact() {
         <div className="container grid lg:grid-cols-3 gap-8">
           <div className="space-y-6">
             {[
-              { icon: Mail, label: "Email", value: "support@assetvault.com" },
-              { icon: Phone, label: "Phone", value: "+1 (800) 555-0199" },
-              { icon: MapPin, label: "Address", value: "350 Financial District, New York, NY" },
-              { icon: Clock, label: "Business Hours", value: "Mon-Fri: 9AM - 6PM EST" },
+              { icon: Mail, label: "Email", value: brand?.support_email || brand?.contact_email || "support@assetvault.com" },
+              { icon: Phone, label: "Phone", value: brand?.contact_phone || "+1 (800) 555-0199" },
+              { icon: MapPin, label: "Address", value: brand?.address || "350 Financial District, New York, NY" },
+              { icon: Clock, label: "Business Hours", value: content.business_hours },
             ].map((c, i) => (
               <Card key={c.label} className="group hover:shadow-md transition-all duration-300 hover:border-primary/50 animate-slide-in-right" style={{ animationDelay: `${i * 100}ms` }}>
                 <CardContent className="p-4 flex items-center gap-4">

@@ -15,6 +15,7 @@ import heroForex from "@/assets/hero-forex.jpg";
 import heroCrypto from "@/assets/hero-crypto.jpg";
 import heroCommodities from "@/assets/hero-commodities.jpg";
 import appMockup from "@/assets/app-mockup.png";
+import { useAppSettings } from "@/hooks/useCmsData";
 
 const heroImages = [heroMain, heroSlide2, heroSlide3];
 
@@ -69,6 +70,16 @@ import { SEOHead } from "@/components/SEOHead";
 
 export default function Index() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { data: homeData } = useAppSettings("homepage_content");
+  
+  // Provide defaults
+  const content = {
+    hero_title: homeData?.hero_title || "Your Gateway to",
+    hero_highlight: homeData?.hero_highlight || "Smart Investing",
+    hero_subtitle: homeData?.hero_subtitle || "Invest in Forex, Crypto, and Commodities with professional-grade tools, copy trading, and managed investment plans designed for maximum returns.",
+    cta_title: homeData?.cta_title || "Ready to Start Investing?",
+    cta_subtitle: homeData?.cta_subtitle || "Join thousands of investors already growing their wealth with AssetVault. Create your free account and start earning today."
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -120,10 +131,10 @@ export default function Index() {
               <Star className="h-4 w-4 text-accent" /> Trusted by 25,000+ investors worldwide
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white font-heading animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-              Your Gateway to <span className="text-gradient-gold">Smart Investing</span>
+              {content.hero_title} <span className="text-gradient-gold">{content.hero_highlight}</span>
             </h1>
             <p className="text-lg text-white/80 max-w-xl animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-              Invest in Forex, Crypto, and Commodities with professional-grade tools, copy trading, and managed investment plans designed for maximum returns.
+              {content.hero_subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
               <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
@@ -386,8 +397,8 @@ export default function Index() {
       {/* CTA */}
       <section className="py-16 bg-muted/30">
         <div className="container text-center space-y-5">
-          <h2 className="text-3xl font-bold">Ready to Start Investing?</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">Join thousands of investors already growing their wealth with AssetVault. Create your free account and start earning today.</p>
+          <h2 className="text-3xl font-bold">{content.cta_title}</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto">{content.cta_subtitle}</p>
           <Button size="lg" asChild>
             <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>

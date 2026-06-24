@@ -856,7 +856,8 @@ export const useMarkNotificationRead = () => {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+      // Scope update by user_id to prevent marking another user's notifications
+      const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id).eq("user_id", user?.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -1216,6 +1217,18 @@ export const useCancelDepositIntent = () => {
   return useMutation({
     mutationFn: async (intentId: string) => {
       if (!user) throw new Error("Not authenticated");
+
+      // Verify the intent belongs to the current user before cancelling
+      const { data: intent, error: lookupError } = await supabase
+        .from("deposit_intents")
+        .select("user_id")
+        .eq("id", intentId)
+        .single();
+      if (lookupError) throw lookupError;
+      if (!intent || intent.user_id !== user.id) {
+        throw new Error("Unauthorized: this deposit does not belong to you");
+      }
+
       const { error } = await supabase.rpc("cancel_deposit_intent", {
         p_intent_id: intentId,
       });
@@ -1247,6 +1260,17 @@ export const useSubmitDepositConfirmation = () => {
       wallet_id: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
+
+      // Verify the intent belongs to the current user before proceeding
+      const { data: intent, error: lookupError } = await supabase
+        .from("deposit_intents")
+        .select("user_id")
+        .eq("id", payload.intentId)
+        .single();
+      if (lookupError) throw lookupError;
+      if (!intent || intent.user_id !== user.id) {
+        throw new Error("Unauthorized: this deposit does not belong to you");
+      }
 
       // 1. Create the deposit record in deposits
       const { data: depositData, error: depositError } = await supabase

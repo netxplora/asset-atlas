@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { TrendingUp, Shield, Target, Users, Zap, Eye, Search, AlertTriangle } from "lucide-react";
+import { TrendingUp, Shield, Target, Users, Zap, Eye, Search, AlertTriangle, CheckCircle2, ArrowRight, HelpCircle } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -97,6 +97,39 @@ export default function CopyTrading() {
         </div>
       </section>
 
+      {/* What is Copy Trading */}
+      <section className="py-16">
+        <div className="container max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">What is Copy Trading?</h2>
+              <p className="text-muted-foreground mb-4">Copy trading allows you to automatically replicate the trades of experienced, professional traders on AssetVault. Instead of analyzing markets yourself, you select a trader whose strategy matches your goals, set your investment amount, and the platform handles the rest.</p>
+              <p className="text-muted-foreground mb-4">Every trade the professional makes is mirrored proportionally in your account in real time. You earn returns based on their performance relative to your invested amount.</p>
+              <p className="text-sm text-muted-foreground">Copy trading is suitable for investors who want exposure to the markets without active trading experience.</p>
+            </div>
+            <Card className="bg-muted/30 border">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="font-semibold flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary" /> Key Points</h3>
+                <ul className="space-y-3">
+                  {[
+                    "No trading experience required to get started",
+                    "Returns are proportional to your investment amount",
+                    "You can stop copying a trader at any time",
+                    "All traders are vetted and ranked by performance",
+                    "Past performance does not guarantee future results",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 bg-muted/30">
         <div className="container">
           <h2 className="text-2xl font-bold text-center mb-8">How Copy Trading Works</h2>
@@ -112,6 +145,31 @@ export default function CopyTrading() {
                 <h3 className="font-semibold">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trader Selection Methodology */}
+      <section className="py-16">
+        <div className="container max-w-4xl">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold mb-3">How We Select and Rank Traders</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">Every trader on AssetVault goes through a rigorous evaluation before being listed on the platform.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {[
+              { title: "Performance History", desc: "Traders must demonstrate consistent returns over a minimum track record period. We evaluate win rate, total profit, and drawdown metrics." },
+              { title: "Risk Management", desc: "We assess each trader's risk management practices, including position sizing, stop-loss usage, and exposure limits." },
+              { title: "Consistency", desc: "Steady, repeatable results are valued over occasional large gains. Traders with erratic performance are flagged." },
+              { title: "Ongoing Monitoring", desc: "Rankings are updated continuously based on recent performance. Traders who underperform are demoted or removed." },
+            ].map((item) => (
+              <Card key={item.title}>
+                <CardContent className="p-5 space-y-2">
+                  <h4 className="font-semibold text-sm">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -190,6 +248,44 @@ export default function CopyTrading() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Risk Disclosure */}
+      <section className="py-16">
+        <div className="container max-w-3xl">
+          <Card className="border-warning/30 bg-warning/5">
+            <CardContent className="p-6 md:p-8 space-y-4">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+                <h3 className="font-bold">Copy Trading Risk Disclosure</h3>
+              </div>
+              <div className="text-sm text-muted-foreground space-y-3">
+                <p>Copy trading involves risk. Past performance of any trader on this platform is not a reliable indicator of future results. The value of your investments can go down as well as up.</p>
+                <p>You should only invest funds that you can afford to lose. Copy trading is not a substitute for professional financial advice. Consider your risk tolerance, financial situation, and investment objectives before copying any trader.</p>
+                <p>AssetVault does not guarantee any returns from copy trading activities. All traders operate independently, and their strategies may involve varying levels of risk.</p>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/risk-disclosure">Read Full Risk Disclosure <ArrowRight className="ml-2 h-3 w-3" /></Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 bg-muted/30">
+        <div className="container text-center space-y-5">
+          <h2 className="text-2xl font-bold">Ready to Start Copy Trading?</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm">Create your account, fund your balance, and start following professional traders today.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild>
+              <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/trust">How It Works</Link>
+            </Button>
           </div>
         </div>
       </section>

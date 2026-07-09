@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { CheckCircle2, Shield, TrendingUp, Clock, Calculator, ArrowRight } from "lucide-react";
+import { CheckCircle2, Shield, TrendingUp, Clock, Calculator, ArrowRight, AlertTriangle } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,22 +16,22 @@ import heroCommodities from "@/assets/hero-commodities.jpg";
 
 const plans = {
   forex: [
-    { tier: "Starter", min: "$100", roi: "8%", duration: "30 days", risk: "Low" },
-    { tier: "Silver", min: "$1,000", roi: "12%", duration: "60 days", risk: "Medium" },
-    { tier: "Gold", min: "$5,000", roi: "18%", duration: "90 days", risk: "Medium" },
-    { tier: "Elite", min: "$25,000", roi: "25%", duration: "180 days", risk: "High" },
+    { tier: "Starter", min: "$100", roi: "8%", duration: "30 days", risk: "Low", recommended: "New investors starting with Forex" },
+    { tier: "Silver", min: "$1,000", roi: "12%", duration: "60 days", risk: "Medium", recommended: "Intermediate investors seeking growth" },
+    { tier: "Gold", min: "$5,000", roi: "18%", duration: "90 days", risk: "Medium", recommended: "Experienced investors with capital" },
+    { tier: "Elite", min: "$25,000", roi: "25%", duration: "180 days", risk: "High", recommended: "High-net-worth long-term investors" },
   ],
   crypto: [
-    { tier: "Starter", min: "$250", roi: "10%", duration: "30 days", risk: "Medium" },
-    { tier: "Silver", min: "$2,500", roi: "15%", duration: "60 days", risk: "Medium" },
-    { tier: "Gold", min: "$10,000", roi: "22%", duration: "90 days", risk: "High" },
-    { tier: "Elite", min: "$50,000", roi: "30%", duration: "180 days", risk: "High" },
+    { tier: "Starter", min: "$250", roi: "10%", duration: "30 days", risk: "Medium", recommended: "New crypto investors" },
+    { tier: "Silver", min: "$2,500", roi: "15%", duration: "60 days", risk: "Medium", recommended: "Investors comfortable with volatility" },
+    { tier: "Gold", min: "$10,000", roi: "22%", duration: "90 days", risk: "High", recommended: "Experienced crypto investors" },
+    { tier: "Elite", min: "$50,000", roi: "30%", duration: "180 days", risk: "High", recommended: "Institutional-level crypto investors" },
   ],
   commodities: [
-    { tier: "Starter", min: "$500", roi: "6%", duration: "30 days", risk: "Low" },
-    { tier: "Silver", min: "$3,000", roi: "10%", duration: "60 days", risk: "Low" },
-    { tier: "Gold", min: "$15,000", roi: "15%", duration: "90 days", risk: "Medium" },
-    { tier: "Elite", min: "$75,000", roi: "20%", duration: "180 days", risk: "Medium" },
+    { tier: "Starter", min: "$500", roi: "6%", duration: "30 days", risk: "Low", recommended: "Conservative investors seeking stability" },
+    { tier: "Silver", min: "$3,000", roi: "10%", duration: "60 days", risk: "Low", recommended: "Long-term portfolio diversifiers" },
+    { tier: "Gold", min: "$15,000", roi: "15%", duration: "90 days", risk: "Medium", recommended: "Balanced investors with capital" },
+    { tier: "Elite", min: "$75,000", roi: "20%", duration: "180 days", risk: "Medium", recommended: "High-net-worth commodity investors" },
   ],
 };
 
@@ -198,7 +198,10 @@ export default function Plans() {
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between"><span className="text-muted-foreground">Min. Investment</span><span className="font-medium">{p.min}</span></div>
                           <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-medium">{p.duration}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Risk Level</span><span className="font-medium">{p.risk}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Risk Level</span><span className={`font-medium ${p.risk === 'Low' ? 'text-success' : p.risk === 'Medium' ? 'text-warning' : 'text-destructive'}`}>{p.risk}</span></div>
+                        </div>
+                        <div className="text-xs text-muted-foreground bg-muted/50 rounded-md p-2 text-center">
+                          <span className="font-medium text-foreground">Recommended for:</span> {p.recommended}
                         </div>
                         <Button className={p.tier === "Gold" ? "w-full bg-accent text-accent-foreground hover:bg-accent/90" : "w-full"} variant={p.tier === "Gold" ? "default" : "outline"} asChild>
                           <Link to="/register">Invest Now</Link>
@@ -289,6 +292,40 @@ export default function Plans() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Risk Warning */}
+      <section className="py-12">
+        <div className="container max-w-3xl">
+          <Card className="border-warning/30 bg-warning/5">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+                <h3 className="font-bold text-sm">Investment Risk Notice</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">All investment plans involve risk. The stated ROI figures represent expected returns based on historical performance and are not guaranteed. Past performance is not indicative of future results. Only invest funds you can afford to lose.</p>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/risk-disclosure">Read Risk Disclosure <ArrowRight className="ml-2 h-3 w-3" /></Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 bg-muted/30">
+        <div className="container text-center space-y-5">
+          <h2 className="text-2xl font-bold">Not Sure Which Plan to Choose?</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm">Use our investment calculator above to compare potential returns, or contact our team for personalized guidance.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild>
+              <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/contact">Talk to an Advisor</Link>
+            </Button>
           </div>
         </div>
       </section>

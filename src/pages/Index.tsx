@@ -14,17 +14,15 @@ import {
   ShieldCheck, UserCheck, Banknote, Eye, FileCheck, HelpCircle,
   ArrowUpRight, RefreshCw, Layers
 } from "lucide-react";
-import heroMain from "@/assets/hero-main.jpg";
-import heroSlide2 from "@/assets/hero-slide-2.png";
-import heroSlide3 from "@/assets/hero-slide-3.png";
 import heroForex from "@/assets/hero-forex.jpg";
 import heroCrypto from "@/assets/hero-crypto.jpg";
 import heroCommodities from "@/assets/hero-commodities.jpg";
+import heroCopytrading from "@/assets/hero-copytrading.jpg";
 import appMockup from "@/assets/app-mockup.png";
 import { useAppSettings } from "@/hooks/useCmsData";
 import { SEOHead } from "@/components/SEOHead";
 
-const heroImages = [heroMain, heroSlide2, heroSlide3];
+const heroImages = [heroCopytrading, heroForex, heroCrypto, heroCommodities];
 
 const cryptoTicker = [
   { pair: "BTC/USD", price: "64,230.50", change: "+2.4%" },
@@ -384,7 +382,7 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 stagger-children">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 stagger-children">
             {howItWorks.map((item, i) => (
               <Card key={item.step} className="reveal glass-card card-hover transition-colors overflow-hidden relative group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full transition-transform group-hover:scale-110" />

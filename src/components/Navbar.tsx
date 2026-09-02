@@ -43,8 +43,8 @@ export function Navbar() {
     >
       <div className="container flex h-16 items-center justify-between">
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2.5 font-heading font-bold text-xl tracking-tight transition-opacity hover:opacity-90">
-          <img src={logo} alt="AssetVault logo" className="h-9 w-auto object-contain" />
+        <Link to="/" className="flex items-center gap-2 font-heading font-semibold text-[15px] tracking-wide transition-opacity hover:opacity-85">
+          <img src={logo} alt="AssetVault logo" className="h-7 w-auto object-contain" />
           <span className="text-foreground">Asset<span className="text-primary">Vault</span></span>
         </Link>
 

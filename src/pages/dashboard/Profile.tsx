@@ -146,6 +146,24 @@ export default function Profile() {
 
   const StatusIcon = kycStatusConfig[kycStatus]?.icon || Shield;
 
+  const getDeviceInfo = () => {
+    const ua = navigator.userAgent;
+    let browser = "Unknown Browser";
+    if (ua.includes("Firefox")) browser = "Firefox";
+    else if (ua.includes("Edg")) browser = "Edge";
+    else if (ua.includes("Chrome")) browser = "Chrome";
+    else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+    
+    let os = "Unknown OS";
+    if (ua.includes("Win")) os = "Windows";
+    else if (ua.includes("Mac")) os = "MacOS";
+    else if (ua.includes("Linux")) os = "Linux";
+    else if (ua.includes("Android")) os = "Android";
+    else if (ua.includes("like Mac")) os = "iOS";
+    
+    return `${browser} on ${os}`;
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
@@ -177,13 +195,50 @@ export default function Profile() {
       )}
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full sm:w-[400px] grid-cols-3 mb-6">
-          <TabsTrigger value="general" className="flex items-center gap-2"><User className="h-4 w-4" /> General</TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2"><Lock className="h-4 w-4" /> Security</TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2"><Settings className="h-4 w-4" /> Preferences</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto justify-start sm:grid sm:w-[400px] sm:grid-cols-3 mb-6 no-scrollbar pb-1">
+          <TabsTrigger value="general" className="flex items-center gap-2 whitespace-nowrap shrink-0"><User className="h-4 w-4" /> General</TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2 whitespace-nowrap shrink-0"><Lock className="h-4 w-4" /> Security</TabsTrigger>
+          <TabsTrigger value="preferences" className="flex items-center gap-2 whitespace-nowrap shrink-0"><Settings className="h-4 w-4" /> Preferences</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6 animate-fade-in-up">
+          <Card>
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Verification Status</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`h-12 w-12 rounded-full flex items-center justify-center shrink-0 border ${kycStatusConfig[kycStatus]?.bg}`}>
+                    <StatusIcon className={`h-6 w-6 ${kycStatusConfig[kycStatus]?.color}`} />
+                  </div>
+                  <div>
+                    <div className="font-semibold">KYC Level 1</div>
+                    <div className="text-sm text-muted-foreground mt-0.5">Required for all withdrawals</div>
+                  </div>
+                </div>
+                {isLoading ? <Skeleton className="h-6 w-20 rounded-full" /> : kycStatusConfig[kycStatus]?.badge}
+              </div>
+              
+              <div className="pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-success" /> Account Registration
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
+                  <CheckCircle2 className="h-4 w-4 text-success" /> Email Verification
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
+                  {kycStatus === 'verified' ? (
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
+                  )} 
+                  Identity Verification
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader className="border-b pb-4">
               <CardTitle className="text-lg">Personal Information</CardTitle>
@@ -393,7 +448,7 @@ export default function Profile() {
             <Card>
               <CardHeader className="border-b pb-4">
                 <CardTitle className="text-lg flex items-center gap-2"><Server className="h-5 w-5 text-primary" /> Active Sessions</CardTitle>
-                <CardDescription>Devices recently logged into your account.</CardDescription>
+                <CardDescription>Devices currently logged into your account.</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
@@ -403,64 +458,15 @@ export default function Profile() {
                         <Smartphone className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold">Chrome on Windows <Badge className="ml-2 text-[9px] uppercase h-4 px-1">Current</Badge></div>
-                        <div className="text-xs text-muted-foreground mt-0.5">IP: 192.168.1.105 · New York, USA</div>
+                        <div className="text-sm font-semibold">{getDeviceInfo()} <Badge className="ml-2 text-[9px] uppercase h-4 px-1">Current</Badge></div>
+                        <div className="text-xs text-muted-foreground mt-0.5">Active now</div>
                       </div>
                     </div>
-                  </div>
-                  <div className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors opacity-75">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                        <Smartphone className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium">Safari on iPhone 13</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">IP: 104.28.10.15 · New York, USA</div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground">2 days ago</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Verification Status</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`h-12 w-12 rounded-full flex items-center justify-center shrink-0 border ${kycStatusConfig[kycStatus]?.bg}`}>
-                    <StatusIcon className={`h-6 w-6 ${kycStatusConfig[kycStatus]?.color}`} />
-                  </div>
-                  <div>
-                    <div className="font-semibold">KYC Level 1</div>
-                    <div className="text-sm text-muted-foreground mt-0.5">Required for all withdrawals</div>
-                  </div>
-                </div>
-                {isLoading ? <Skeleton className="h-6 w-20 rounded-full" /> : kycStatusConfig[kycStatus]?.badge}
-              </div>
-              
-              <div className="pt-4 border-t">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-success" /> Account Registration
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
-                  <CheckCircle2 className="h-4 w-4 text-success" /> Email Verification
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
-                  {kycStatus === 'verified' ? (
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                  ) : (
-                    <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
-                  )} 
-                  Identity Verification
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="preferences" className="space-y-6 animate-fade-in-up">

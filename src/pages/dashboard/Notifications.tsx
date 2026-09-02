@@ -92,7 +92,7 @@ export default function Notifications() {
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Notifications</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Notifications</h1>
           <p className="text-sm text-muted-foreground mt-1">Stay updated on your account activity and investments.</p>
         </div>
         <div className="flex items-center gap-3">

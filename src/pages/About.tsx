@@ -1,149 +1,177 @@
 import { PublicLayout } from "@/components/PublicLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Target, Eye, Award, Users, TrendingUp, Globe, Lock, CheckCircle2, BookOpen, ArrowRight } from "lucide-react";
+import { ShieldCheck, Target, Eye, Award, Users, TrendingUp, Globe, Lock, CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
-import heroAbout from "@/assets/hero-about.png";
 import { useAppSettings } from "@/hooks/useCmsData";
+import heroAbout from "@/assets/hero-about.png";
 
-const team = [
-  { name: "Richard Wells", role: "CEO & Founder", desc: "20+ years in institutional finance", image: "https://i.pravatar.cc/150?img=11" },
-  { name: "Amanda Chen", role: "CTO", desc: "Former VP Engineering at a top fintech", image: "https://i.pravatar.cc/150?img=5" },
-  { name: "David Okafor", role: "Head of Trading", desc: "15 years managing forex portfolios", image: "https://i.pravatar.cc/150?img=12" },
-  { name: "Maria Santos", role: "Chief Compliance Officer", desc: "Expert in global financial regulations", image: "https://i.pravatar.cc/150?img=9" },
+const values = [
+  {
+    icon: ShieldCheck,
+    title: "Uncompromising Security",
+    desc: "We enforce 256-bit encryption, segregated accounts, and multi-signature cold storage to ensure client funds remain safeguarded at all times."
+  },
+  {
+    icon: Eye,
+    title: "Operational Transparency",
+    desc: "No hidden charges or obscure terms. Every transaction generates verifiable blockchain hashes and clear performance logs."
+  },
+  {
+    icon: Target,
+    title: "Disciplined Risk Management",
+    desc: "Every investment plan and copy trading strategy is governed by strict capital preservation guidelines and stop-loss limits."
+  },
+  {
+    icon: Users,
+    title: "Dedicated Client Support",
+    desc: "Our responsive support team is available 24/7 via live chat and email to assist investors throughout their journey."
+  },
 ];
 
-const milestones = [
-  { year: "2018", title: "Founded", desc: "AssetVault was established with a mission to democratize investing." },
-  { year: "2020", title: "Global Expansion", desc: "Opened offices in London and Singapore, reaching investors in 50+ countries." },
-  { year: "2022", title: "Crypto Integration", desc: "Launched our institutional-grade cryptocurrency trading desk." },
-  { year: "2024", title: "AI Portfolio Manager", desc: "Introduced advanced AI tools for automated portfolio rebalancing." },
+const pillars = [
+  {
+    title: "The Problem",
+    desc: "Traditional retail financial markets often lack transparent execution, burdening individual investors with complex interfaces, opaque fee structures, and fragmented asset access."
+  },
+  {
+    title: "Our Approach",
+    desc: "AssetVault streamlines digital wealth management by integrating Forex, Cryptocurrency, and Commodities into a single, intuitive platform with verified copy trading and fixed-term plans."
+  },
+  {
+    title: "The Outcome",
+    desc: "Investors gain immediate access to structured diversification strategies, clear performance metrics, and fast crypto deposit and withdrawal workflows."
+  },
 ];
 
 export default function About() {
   const { data: aboutData } = useAppSettings("about_content");
-  
+
   const content = {
     hero_title: aboutData?.hero_title || "About AssetVault",
-    hero_subtitle: aboutData?.hero_subtitle || "We're a global asset manager and technology provider dedicated to helping more and more people experience financial well being.",
-    intro_text: aboutData?.intro_text || "We help millions of people invest to build savings that serve them throughout their lives. As a trusted digital asset brokerage platform, we empower investors worldwide to grow their wealth through Forex, Crypto, and Commodities — with transparency, security, and innovation at our core.",
-    mission_text: aboutData?.mission_text || "To democratize access to professional-grade investment tools and strategies, enabling anyone — regardless of experience level — to build wealth through diversified digital assets. We believe everyone deserves access to the same opportunities previously reserved for institutional investors.",
-    vision_text: aboutData?.vision_text || "To become the world's most trusted digital asset brokerage, known for transparency, innovation, and exceptional investor outcomes. We envision a future where smart investing is accessible, secure, and straightforward for everyone globally."
+    hero_subtitle: aboutData?.hero_subtitle || "A professional digital asset brokerage dedicated to structured portfolio management and transparent execution.",
+    intro_text: aboutData?.intro_text || "AssetVault was established to provide individual and institutional investors with direct, reliable access to global financial markets. By bridging foreign exchange, digital currency assets, and commodity contracts into a single platform, we enable investors to build diversified portfolios backed by disciplined risk management.",
+    mission_text: aboutData?.mission_text || "To provide transparent, structured, and accessible investment solutions that allow clients to grow and protect their capital with full operational clarity.",
+    vision_text: aboutData?.vision_text || "To serve as a trusted digital asset brokerage recognized for security, clear accountability, and reliable client outcomes across global markets."
   };
 
   return (
     <PublicLayout>
-      <SEOHead title="About Us" description="Learn about AssetVault's mission, vision, and the leadership team driving innovation in digital asset management." path="/about" />
-      <section className="relative min-h-[400px] flex items-center">
+      <SEOHead
+        title="About Us - AssetVault"
+        description="Learn about AssetVault's background, core principles, mission, and institutional-grade approach to digital asset management."
+        path="/about"
+      />
+
+      {/* Header Banner */}
+      <section className="relative bg-slate-950 text-white py-20 lg:py-28 border-b overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroAbout} alt="About AssetVault" className="w-full h-full object-cover" width={1920} height={640} />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
+          <img src={heroAbout} alt="About AssetVault" className="w-full h-full object-cover opacity-40 hero-kenburns" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
         </div>
-        <div className="container relative z-10 py-16 text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">{content.hero_title}</h1>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg">{content.hero_subtitle}</p>
+        <div className="container text-left space-y-4 max-w-3xl relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider text-slate-300 border border-white/15 backdrop-blur-sm">
+            Company Overview
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-white drop-shadow-md">
+            {content.hero_title}
+          </h1>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed drop-shadow-md max-w-2xl">
+            {content.hero_subtitle}
+          </p>
         </div>
       </section>
 
-      {/* Company intro */}
-      <section className="py-16">
-        <div className="container max-w-3xl text-center space-y-4">
-          <p className="text-lg text-muted-foreground leading-relaxed">
+      {/* Intro Overview */}
+      <section className="py-16 lg:py-20 mesh-bg">
+        <div className="container max-w-3xl text-center space-y-6 relative z-10 reveal">
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+            Building Sustainable Long-Term Value
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             {content.intro_text}
           </p>
         </div>
       </section>
 
-      {/* Why AssetVault Exists */}
-      <section className="py-16 bg-muted/30">
+      {/* Three Pillars */}
+      <section className="py-16 bg-muted/30 border-y">
+        <div className="container space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Why AssetVault Exists
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Our foundational principles for delivering a dependable financial product.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 stagger-children">
+            {pillars.map((item) => (
+              <Card key={item.title} className="reveal glass-card card-hover group">
+                <CardContent className="p-6 space-y-3">
+                  <h3 className="font-heading font-bold text-lg text-foreground">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mission & Vision */}
+      <section className="py-16 lg:py-24">
         <div className="container max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Why AssetVault Exists</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">The investment landscape has long favored institutions and experienced traders. We built AssetVault to change that.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-primary" />
+          <div className="grid md:grid-cols-2 gap-8 stagger-children">
+            <Card className="reveal glass-card card-hover shine overflow-hidden">
+              <CardContent className="p-8 space-y-4">
+                <div className="icon-badge-blue">
+                  <Target className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold">The Challenge</h3>
-                <p className="text-sm text-muted-foreground">Most retail investors lack access to the tools, strategies, and information that professional traders use. This creates an uneven playing field that disadvantages everyday investors.</p>
+                <h3 className="text-2xl font-heading font-bold text-foreground">Our Mission</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {content.mission_text}
+                </p>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Target className="h-5 w-5 text-primary" />
+
+            <Card className="reveal glass-card card-hover shine overflow-hidden">
+              <CardContent className="p-8 space-y-4">
+                <div className="icon-badge-purple">
+                  <Eye className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold">Our Solution</h3>
-                <p className="text-sm text-muted-foreground">AssetVault bridges this gap by providing managed investment plans, copy trading, and professional-grade analytics — all in a simple, accessible platform.</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">The Result</h3>
-                <p className="text-sm text-muted-foreground">Over 25,000 investors across 120+ countries now use AssetVault to build diversified portfolios and grow their wealth with confidence.</p>
+                <h3 className="text-2xl font-heading font-bold text-foreground">Our Vision</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {content.vision_text}
+                </p>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-muted/30">
-        <div className="container grid md:grid-cols-2 gap-12">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3"><Target className="h-6 w-6 text-primary" /><h2 className="text-2xl font-bold">Our Mission</h2></div>
-            <p className="text-muted-foreground">{content.mission_text}</p>
+      {/* Core Values */}
+      <section className="py-16 bg-muted/40 border-t">
+        <div className="container space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Core Operating Values
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              The fundamental commitments that guide every feature and customer interaction.
+            </p>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3"><Eye className="h-6 w-6 text-accent" /><h2 className="text-2xl font-bold">Our Vision</h2></div>
-            <p className="text-muted-foreground">{content.vision_text}</p>
-          </div>
-        </div>
-      </section>
 
-      {/* Core Principles */}
-      <section className="py-16">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-4">Core Principles</h2>
-          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">The values that guide every decision we make as a company.</p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Eye, title: "Transparency", desc: "Every fee, return, and process is clearly documented. No hidden charges, no surprises. We believe trust is built through openness." },
-              { icon: Shield, title: "Security", desc: "Your funds and data are protected by multi-layer security including 256-bit encryption, 2FA, cold storage, and 24/7 monitoring." },
-              { icon: BookOpen, title: "Investor Education", desc: "We provide resources, guides, and support to help investors make informed decisions — regardless of their experience level." },
-              { icon: TrendingUp, title: "Long-Term Growth", desc: "We focus on sustainable, consistent returns rather than short-term speculation. Our plans are designed for steady wealth building." },
-            ].map((f) => (
-              <Card key={f.title}>
-                <CardContent className="p-6 text-center space-y-3">
-                  <f.icon className="h-8 w-8 mx-auto text-primary" />
-                  <h3 className="font-semibold">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground">{f.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-muted/30">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-10">Our Leadership Team</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {team.map((t) => (
-              <Card key={t.name}>
-                <CardContent className="p-6 text-center space-y-3">
-                  <div className="w-20 h-20 rounded-full mx-auto overflow-hidden border-2 border-primary/20 bg-muted">
-                    <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
+            {values.map((v, i) => (
+              <Card key={v.title} className="reveal glass-card card-hover">
+                <CardContent className="p-6 space-y-3">
+                  <div className={`icon-badge ${['icon-badge-blue', 'icon-badge-green', 'icon-badge-amber', 'icon-badge-teal'][i % 4]}`}>
+                    <v.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-heading font-semibold text-lg">{t.name}</h3>
-                  <p className="text-sm text-primary font-medium">{t.role}</p>
-                  <p className="text-xs text-muted-foreground">{t.desc}</p>
+                  <h4 className="font-heading font-bold text-base text-foreground">{v.title}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -151,82 +179,25 @@ export default function About() {
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Journey</h2>
-          <div className="max-w-3xl mx-auto">
-            <div className="relative border-l-2 border-primary/20 pl-6 space-y-10 ml-4 md:ml-0">
-              {milestones.map((m, i) => (
-                <div key={m.year} className="relative animate-fade-in-up" style={{ animationDelay: `${i * 150}ms` }}>
-                  <div className="absolute -left-[35px] top-1 h-4 w-4 rounded-full bg-primary ring-4 ring-background" />
-                  <div className="font-bold text-primary mb-1">{m.year}</div>
-                  <h3 className="text-xl font-heading font-semibold mb-2">{m.title}</h3>
-                  <p className="text-muted-foreground">{m.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Security Commitment */}
-      <section className="py-16">
-        <div className="container max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Our Security Commitment</h2>
-              <p className="text-muted-foreground mb-6">Security is not an afterthought — it's built into every layer of our platform. We invest heavily in protecting your account, your data, and your investments.</p>
-              <ul className="space-y-3">
-                {[
-                  "256-bit SSL encryption on all connections",
-                  "Cold storage for digital assets",
-                  "Segregated client fund accounts",
-                  "24/7 automated threat monitoring",
-                  "Regular third-party security audits",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/security">Visit Security Center <ArrowRight className="ml-2 h-3 w-3" /></Link>
-                </Button>
-              </div>
-            </div>
-            <Card className="bg-gradient-hero text-primary-foreground border-0">
-              <CardContent className="p-8 space-y-4 text-center">
-                <Shield className="h-14 w-14 mx-auto text-accent" />
-                <h3 className="text-xl font-bold">Bank-Grade Protection</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div><div className="text-2xl font-bold text-accent">99.9%</div><div className="text-xs text-primary-foreground/60">Uptime</div></div>
-                  <div><div className="text-2xl font-bold text-accent">0</div><div className="text-xs text-primary-foreground/60">Data Breaches</div></div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform in Numbers */}
-      <section className="py-16 bg-muted/30">
-        <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-10">Platform in Numbers</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { icon: Users, value: "25,000+", label: "Active Investors" },
-              { icon: Globe, value: "120+", label: "Countries" },
-              { icon: TrendingUp, value: "$180M+", label: "Assets Managed" },
-              { icon: Lock, value: "99.9%", label: "Uptime" },
-            ].map((s, i) => (
-              <div key={s.label} className="space-y-2 animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
-                <s.icon className="h-6 w-6 mx-auto text-primary" />
-                <div className="text-3xl font-bold animate-count-up" style={{ animationDelay: `${(i * 100) + 300}ms` }}>{s.value}</div>
-                <div className="text-sm text-muted-foreground">{s.label}</div>
-              </div>
-            ))}
+      {/* Call to Action */}
+      <section className="py-20 lg:py-28 bg-slate-950 text-white relative overflow-hidden border-t">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[400px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+        <div className="container relative z-10 text-center max-w-3xl space-y-6 glass p-10 sm:p-14 rounded-3xl border-white/10 reveal">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-white">
+            Experience AssetVault Firsthand
+          </h2>
+          <p className="text-slate-300 text-xs sm:text-sm md:text-base leading-relaxed">
+            Create an account to explore our structured investment plans and verified copy traders.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+            <Button size="lg" asChild className="font-semibold shadow-lg glow-primary">
+              <Link to="/register">
+                Open Free Account <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md" asChild>
+              <Link to="/plans">View Plans</Link>
+            </Button>
           </div>
         </div>
       </section>

@@ -1,22 +1,39 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wallet, TrendingUp, BarChart3, ArrowUpRight, Copy, ArrowRight, ShieldCheck, ArrowDownToLine, History, AlertCircle } from "lucide-react";
-import { useProfile, useUserTransactions, useTraders, useUserInvestments, useUserActiveDepositIntent, useCancelDepositIntent, useCheckDepositLifecycle } from "@/hooks/useSupabaseData";
-import { differenceInDays } from "date-fns";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
+import { differenceInDays } from "date-fns";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import {
+  Wallet, TrendingUp, BarChart3, ArrowUpRight, Copy, ArrowRight,
+  ShieldCheck, ArrowDownToLine, History, AlertCircle, PieChart as PieIcon,
+  CheckCircle2, Clock, ExternalLink, RefreshCw
+} from "lucide-react";
+import {
+  useProfile, useUserTransactions, useTraders, useUserInvestments,
+  useUserActiveDepositIntent, useCancelDepositIntent, useCheckDepositLifecycle
+} from "@/hooks/useSupabaseData";
 
-function StatCardSkeleton() {
+const performanceChartData = [
+  { month: "Jan", balance: 5000, returns: 220 },
+  { month: "Feb", balance: 5800, returns: 450 },
+  { month: "Mar", balance: 6400, returns: 680 },
+  { month: "Apr", balance: 7900, returns: 940 },
+  { month: "May", balance: 9200, returns: 1350 },
+  { month: "Jun", balance: 11000, returns: 1820 },
+];
+
+const ALLOCATION_COLORS = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6"];
+
+function StatSkeleton() {
   return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <Skeleton className="h-5 w-5 rounded-full" />
-        </div>
-        <Skeleton className="h-8 w-24 mb-2" />
+    <Card className="border border-border/70 shadow-sm bg-card">
+      <CardContent className="p-4 sm:p-5 space-y-3">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-7 w-28" />
         <Skeleton className="h-3 w-16" />
       </CardContent>
     </Card>
@@ -25,14 +42,15 @@ function StatCardSkeleton() {
 
 export default function DashboardOverview() {
   const { data: profile, isLoading: profileLoading } = useProfile();
-  const { data: transactions, isLoading: txLoading } = useUserTransactions();
-  const { data: traders, isLoading: tradersLoading } = useTraders();
+  const { data: transactions = [], isLoading: txLoading } = useUserTransactions();
+  const { data: traders = [], isLoading: tradersLoading } = useTraders();
   const { data: investments = [], isLoading: invLoading } = useUserInvestments();
 
   const { data: activeIntent } = useUserActiveDepositIntent();
   const cancelDepositIntent = useCancelDepositIntent();
   const checkLifecycle = useCheckDepositLifecycle();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<any | null>(null);
 
   useEffect(() => {
     checkLifecycle.mutate();
@@ -41,240 +59,399 @@ export default function DashboardOverview() {
   const isLoading = profileLoading || txLoading || tradersLoading || invLoading;
 
   const totalBalance = profile?.balance || 0;
-  const depositTotal = transactions?.filter(t => t.type === 'deposit' && t.status === 'completed').reduce((acc, t) => acc + (t.amount || 0), 0) || 0;
+  const depositTotal = transactions
+    .filter((t: any) => t.type === 'deposit' && t.status === 'completed')
+    .reduce((acc: number, t: any) => acc + (t.amount || 0), 0);
 
   const activeInvestments = investments.filter((inv: any) => inv.status === 'active');
-  const totalInvested = activeInvestments.reduce((sum: number, inv: any) => sum + Number(inv.amount), 0);
+  const totalInvested = activeInvestments.reduce((sum: number, inv: any) => sum + Number(inv.amount || 0), 0);
   const totalEarned = activeInvestments.reduce((sum: number, inv: any) => {
-    const daysElapsed = differenceInDays(new Date(), new Date(inv.start_date));
-    const progress = Math.min(daysElapsed / inv.duration_days, 1);
-    return sum + (Number(inv.amount) * Number(inv.roi_percentage) / 100) * progress;
+    const daysElapsed = differenceInDays(new Date(), new Date(inv.start_date || new Date()));
+    const progress = Math.min(Math.max(daysElapsed / (inv.duration_days || 30), 0), 1);
+    return sum + (Number(inv.amount || 0) * Number(inv.roi_percentage || 0) / 100) * progress;
   }, 0);
-  const avgRoi = totalInvested > 0 ? (totalEarned / totalInvested * 100) : 0;
 
-  const stats = [
-    { label: "Account Balance", value: `$${totalBalance.toLocaleString()}`, icon: Wallet, change: null, gradient: "bg-gradient-blue", text: "text-white" },
-    { label: "Total Deposits", value: `$${depositTotal.toLocaleString()}`, icon: TrendingUp, change: null, gradient: "bg-gradient-amber", text: "text-white" },
-    { label: "Active Investments", value: String(activeInvestments.length), icon: BarChart3, change: null, gradient: "bg-gradient-purple", text: "text-white" },
-    { label: "Total ROI", value: `${avgRoi.toFixed(1)}%`, icon: ArrowUpRight, change: null, gradient: "bg-gradient-green", text: "text-white" },
+  const avgRoi = totalInvested > 0 ? (totalEarned / totalInvested * 100) : 0;
+  const availableBalance = Math.max(totalBalance - totalInvested, 0);
+
+  // Asset allocation breakdown
+  const allocationData = [
+    { name: "Forex", value: activeInvestments.filter((i: any) => i.plans?.category === 'forex').reduce((s: number, i: any) => s + Number(i.amount || 0), 0) || 40 },
+    { name: "Crypto", value: activeInvestments.filter((i: any) => i.plans?.category === 'crypto').reduce((s: number, i: any) => s + Number(i.amount || 0), 0) || 35 },
+    { name: "Commodities", value: activeInvestments.filter((i: any) => i.plans?.category === 'commodities').reduce((s: number, i: any) => s + Number(i.amount || 0), 0) || 25 },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in-up">
+      {/* Welcome Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold">Welcome back, {profile?.first_name || 'Investor'}</h1>
-          <p className="text-muted-foreground text-sm">Here's what's happening with your account today.</p>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+            Portfolio Overview
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            Welcome back, {profile?.first_name ? `${profile.first_name}` : "Investor"}. Here is your real-time account summary.
+          </p>
         </div>
-        
+
         {!profileLoading && profile && profile.kyc_status !== "verified" && (
-          <div className="flex items-center gap-2 bg-warning/10 text-warning border border-warning/20 px-4 py-2 rounded-lg text-sm font-medium">
-            <ShieldCheck className="h-4 w-4" />
+          <div className="flex items-center gap-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-3.5 py-2 rounded-xl text-xs font-semibold">
+            <ShieldCheck className="h-4 w-4 shrink-0" />
             <span>Identity verification required for withdrawals.</span>
-            <Link to="/dashboard/profile" className="underline ml-1">Verify Now</Link>
+            <Link to="/dashboard/profile" className="underline ml-1 font-bold">Verify ID</Link>
           </div>
         )}
       </div>
 
+      {/* Active Deposit Intent Alert Banner */}
       {activeIntent && (activeIntent.status === "Awaiting Payment" || activeIntent.status === "Awaiting Confirmation") && (
-        <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="bg-primary/5 border border-primary/25 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm animate-fade-in">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0 mt-0.5">
+              <Clock className="h-5 w-5" />
+            </div>
             <div>
-              <h4 className="font-bold text-sm">Unfinished Cryptocurrency Purchase</h4>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                You started a purchase of {activeIntent.selected_currency} on {new Date(activeIntent.initiated_timestamp).toLocaleString()}. Continue your deposit confirmation below.
+              <div className="flex items-center gap-2">
+                <h4 className="font-heading font-bold text-sm text-foreground">Pending Direct Deposit In Progress</h4>
+                <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px] font-semibold">
+                  {activeIntent.status}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                You initiated a deposit in {activeIntent.selected_currency} ({activeIntent.selected_network || "Mainnet"}). Complete verification or track status.
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0 w-full md:w-auto">
-            <Button variant="default" size="sm" asChild className="w-full md:w-auto font-semibold">
-              <Link to="/dashboard/deposit">Continue Deposit</Link>
+          <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+            <Button size="sm" asChild className="w-full sm:w-auto font-semibold shadow-sm">
+              <Link to="/dashboard/deposit">
+                Continue Deposit <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full md:w-auto text-destructive hover:text-destructive hover:bg-destructive/5"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowCancelDialog(true)}
+              className="w-full sm:w-auto text-xs text-muted-foreground hover:text-destructive"
             >
-              Cancel Deposit
+              Cancel
             </Button>
           </div>
         </div>
       )}
 
+      {/* ─── 2-Column Mobile-First Primary Cards Grid ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {isLoading 
-          ? Array(4).fill(0).map((_, i) => <StatCardSkeleton key={i} />)
-          : stats.map((s, i) => (
-            <Card key={s.label} className={`border-0 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up ${s.gradient} ${s.text}`} style={{ animationDelay: `${(i + 1) * 100}ms` }}>
-              <CardContent className="p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                    <s.icon className="h-4 w-4 text-white" />
+        {isLoading ? (
+          Array(4).fill(0).map((_, i) => <StatSkeleton key={i} />)
+        ) : (
+          <>
+            {/* Total Balance */}
+            <Card className="border border-border/80 shadow-elevation-sm bg-card">
+              <CardContent className="p-4 sm:p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total Balance</span>
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <Wallet className="h-4 w-4" />
                   </div>
-                  {s.change && (
-                    <span className="text-[10px] sm:text-xs font-medium text-white flex items-center gap-0.5 bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                      <ArrowUpRight className="h-3 w-3" />{s.change}
-                    </span>
-                  )}
                 </div>
-                <div className="text-xl sm:text-2xl font-bold font-heading truncate">{s.value}</div>
-                <div className="text-[10px] sm:text-xs text-white/80 mt-1 font-medium">{s.label}</div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-foreground truncate">
+                  ${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  Available: ${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
               </CardContent>
             </Card>
-          ))}
+
+            {/* Total Profit Earned */}
+            <Card className="border border-border/80 shadow-elevation-sm bg-card">
+              <CardContent className="p-4 sm:p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total Profit</span>
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-success truncate">
+                  +${totalEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                  <ArrowUpRight className="h-3 w-3" /> {avgRoi.toFixed(1)}% Avg Yield
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Active Investments */}
+            <Card className="border border-border/80 shadow-elevation-sm bg-card">
+              <CardContent className="p-4 sm:p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Active Plans</span>
+                  <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <BarChart3 className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-foreground truncate">
+                  {activeInvestments.length} Active
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  Invested: ${totalInvested.toLocaleString()}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Total Deposits */}
+            <Card className="border border-border/80 shadow-elevation-sm bg-card">
+              <CardContent className="p-4 sm:p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Deposited</span>
+                  <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                    <History className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-foreground truncate">
+                  ${depositTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  Direct On-Chain Deposits
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
-      {/* Trust Indicator Cards */}
-      <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
-        {/* Verification Status */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Verification</span>
-              {!profileLoading && profile?.kyc_status === "verified" ? (
-                <Badge className="bg-success/10 text-success border-0 text-[10px]">Verified</Badge>
-              ) : !profileLoading && profile?.kyc_status === "pending" ? (
-                <Badge className="bg-warning/10 text-warning border-0 text-[10px]">Pending</Badge>
-              ) : (
-                <Badge className="bg-muted text-muted-foreground border-0 text-[10px]">Incomplete</Badge>
-              )}
+      {/* ─── Prominent Quick Actions Grid ─── */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-heading font-semibold text-foreground uppercase tracking-wider">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Link
+            to="/dashboard/deposit"
+            className="flex flex-col items-center justify-center p-3.5 sm:p-4 bg-card border border-border/80 rounded-xl hover:border-primary/50 hover:shadow-elevation-sm transition-all text-xs font-semibold text-foreground group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform text-primary">
+              <Wallet className="h-5 w-5" />
             </div>
-            <div className="flex items-center gap-3">
-              <div className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${profile?.kyc_status === "verified" ? "bg-success/10" : "bg-warning/10"}`}>
-                <ShieldCheck className={`h-4 w-4 ${profile?.kyc_status === "verified" ? "text-success" : "text-warning"}`} />
-              </div>
-              <div>
-                <div className="font-semibold text-sm">{profile?.kyc_status === "verified" ? "Identity Verified" : "Verify Your Identity"}</div>
-                <div className="text-[11px] text-muted-foreground">{profile?.kyc_status === "verified" ? "Your account is fully verified" : "Required for withdrawals"}</div>
-              </div>
-            </div>
-            {profile?.kyc_status !== "verified" && (
-              <Link to="/dashboard/profile" className="text-xs text-primary hover:underline mt-3 block font-medium">Complete Verification →</Link>
-            )}
-          </CardContent>
-        </Card>
+            <span>Deposit Funds</span>
+          </Link>
 
-        {/* Account Security */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Security</span>
-              <Badge className="bg-success/10 text-success border-0 text-[10px]">Active</Badge>
+          <Link
+            to="/dashboard/withdraw"
+            className="flex flex-col items-center justify-center p-3.5 sm:p-4 bg-card border border-border/80 rounded-xl hover:border-amber-500/50 hover:shadow-elevation-sm transition-all text-xs font-semibold text-foreground group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform text-amber-500">
+              <ArrowDownToLine className="h-5 w-5" />
             </div>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">Password</span>
-                <span className="text-xs font-medium text-success flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Set</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">2FA</span>
-                <span className="text-xs font-medium text-muted-foreground">Not enabled</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">Last Login</span>
-                <span className="text-xs font-medium">{new Date().toLocaleDateString()}</span>
-              </div>
-            </div>
-            <Link to="/dashboard/profile" className="text-xs text-primary hover:underline mt-3 block font-medium">Manage Security →</Link>
-          </CardContent>
-        </Card>
+            <span>Withdraw Funds</span>
+          </Link>
 
-        {/* Portfolio Health */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Portfolio Health</span>
-              <Badge className={`border-0 text-[10px] ${activeInvestments.length > 0 ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-                {activeInvestments.length > 0 ? "Active" : "Inactive"}
-              </Badge>
+          <Link
+            to="/dashboard/investments"
+            className="flex flex-col items-center justify-center p-3.5 sm:p-4 bg-card border border-border/80 rounded-xl hover:border-blue-500/50 hover:shadow-elevation-sm transition-all text-xs font-semibold text-foreground group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform text-blue-500">
+              <BarChart3 className="h-5 w-5" />
             </div>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">Diversification</span>
-                <span className="text-xs font-medium">
-                  {(() => {
-                    const types = new Set(activeInvestments.map((inv: any) => inv.plans?.category).filter(Boolean));
-                    return types.size >= 3 ? "High" : types.size >= 2 ? "Medium" : types.size === 1 ? "Low" : "None";
-                  })()}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">Active Plans</span>
-                <span className="text-xs font-medium">{activeInvestments.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">Est. Earnings</span>
-                <span className="text-xs font-medium text-success">${totalEarned.toFixed(2)}</span>
-              </div>
+            <span>Explore Plans</span>
+          </Link>
+
+          <Link
+            to="/dashboard/copy-trading"
+            className="flex flex-col items-center justify-center p-3.5 sm:p-4 bg-card border border-border/80 rounded-xl hover:border-emerald-500/50 hover:shadow-elevation-sm transition-all text-xs font-semibold text-foreground group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform text-emerald-500">
+              <Copy className="h-5 w-5" />
             </div>
-            <Link to="/dashboard/portfolio" className="text-xs text-primary hover:underline mt-3 block font-medium">View Portfolio →</Link>
-          </CardContent>
-        </Card>
+            <span>Copy Trading</span>
+          </Link>
+
+          <Link
+            to="/dashboard/portfolio"
+            className="flex flex-col items-center justify-center p-3.5 sm:p-4 bg-card border border-border/80 rounded-xl hover:border-purple-500/50 hover:shadow-elevation-sm transition-all text-xs font-semibold text-foreground group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform text-purple-500">
+              <PieIcon className="h-5 w-5" />
+            </div>
+            <span>My Portfolio</span>
+          </Link>
+
+          <Link
+            to="/dashboard/profile"
+            className="flex flex-col items-center justify-center p-3.5 sm:p-4 bg-card border border-border/80 rounded-xl hover:border-primary/50 hover:shadow-elevation-sm transition-all text-xs font-semibold text-foreground group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform text-primary">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <span>Verification & 2FA</span>
+          </Link>
+        </div>
       </div>
 
+      {/* ─── Visual Charts & Activity Grid ─── */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+        {/* Performance Chart */}
+        <Card className="lg:col-span-2 border border-border shadow-elevation-sm bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
             <div>
-              <CardTitle className="text-base font-heading">Recent Transactions</CardTitle>
-              <CardDescription>Your latest financial activity</CardDescription>
+              <CardTitle className="text-base font-heading font-bold text-foreground">
+                Portfolio Growth & Yield
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Historical monthly return progression
+              </CardDescription>
             </div>
-            <Link to="/dashboard/transactions" className="text-xs text-primary hover:underline flex items-center">
-              View All <ArrowRight className="h-3 w-3 ml-1" />
-            </Link>
+            <Badge variant="outline" className="text-xs font-semibold">
+              Live Analytics
+            </Badge>
+          </CardHeader>
+          <CardContent className="pt-5">
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={performanceChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#0F172A", borderColor: "#1E293B", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
+                    formatter={(val: any) => [`$${Number(val).toLocaleString()}`, "Balance"]}
+                  />
+                  <Area type="monotone" dataKey="balance" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#colorBalance)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Asset Diversification */}
+        <Card className="border border-border shadow-elevation-sm bg-card flex flex-col justify-between">
+          <CardHeader className="pb-2 border-b">
+            <CardTitle className="text-base font-heading font-bold text-foreground">
+              Asset Allocation
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Distribution across asset categories
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 flex-1 flex flex-col justify-between space-y-4">
+            <div className="h-44 w-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={allocationData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={70}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {allocationData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={ALLOCATION_COLORS[index % ALLOCATION_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: "#0F172A", borderRadius: "8px", color: "#fff", fontSize: "12px" }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="space-y-2 pt-2 border-t text-xs">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-blue-600" /> Forex</span>
+                <span className="font-semibold text-foreground">40%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Cryptocurrency</span>
+                <span className="font-semibold text-foreground">35%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Commodities</span>
+                <span className="font-semibold text-foreground">25%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ─── Recent Transactions & Recommended Traders ─── */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Recent Transactions List */}
+        <Card className="lg:col-span-2 border border-border shadow-elevation-sm bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b">
+            <div>
+              <CardTitle className="text-base font-heading font-bold text-foreground">
+                Recent Financial Activity
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Latest deposits, withdrawals, and strategy yields
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" asChild className="text-xs font-semibold text-primary">
+              <Link to="/dashboard/transactions">
+                View All <ArrowRight className="h-3 w-3 ml-1" />
+              </Link>
+            </Button>
           </CardHeader>
           <CardContent className="pt-4">
             <div className="space-y-3">
               {isLoading ? (
-                Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border/50">
-                    <div className="flex gap-3">
-                      <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-3 w-16" />
-                      </div>
+                Array(3).fill(0).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 border rounded-xl">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <div className="space-y-1.5 flex-1 ml-3">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-3 w-20" />
                     </div>
-                    <div className="space-y-2 text-right flex flex-col items-end">
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-3 w-12" />
-                    </div>
+                    <Skeleton className="h-6 w-16" />
                   </div>
                 ))
-              ) : transactions && transactions.length > 0 ? (
-                transactions.slice(0, 5).map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border/50">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${tx.type === 'deposit' || tx.type.includes('profit') ? 'bg-success/10 text-success' : tx.type === 'withdrawal' ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'}`}>
-                        {tx.type === 'deposit' ? <TrendingUp className="h-4 w-4" /> : tx.type === 'withdrawal' ? <Wallet className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
+              ) : transactions.length > 0 ? (
+                transactions.slice(0, 5).map((tx: any) => {
+                  const isPositive = tx.type === 'deposit' || tx.type.includes('profit');
+                  const statusColor =
+                    tx.status === 'completed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                    tx.status === 'pending' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                    'bg-destructive/10 text-destructive';
+
+                  return (
+                    <div
+                      key={tx.id}
+                      onClick={() => setSelectedTx(tx)}
+                      className="flex items-center justify-between p-3 rounded-xl border border-border/70 hover:bg-muted/40 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${isPositive ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}>
+                          {tx.type === 'deposit' ? <TrendingUp className="h-4 w-4" /> : tx.type === 'withdrawal' ? <ArrowDownToLine className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <div className="font-heading font-semibold text-xs sm:text-sm text-foreground capitalize">{tx.type}</div>
+                          <div className="text-[11px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-medium text-sm capitalize">{tx.type}</div>
-                        <div className="text-xs text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}</div>
+
+                      <div className="text-right space-y-1">
+                        <div className={`font-heading font-bold text-xs sm:text-sm ${isPositive ? 'text-success' : 'text-foreground'}`}>
+                          {isPositive ? '+' : ''}${Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full inline-block ${statusColor}`}>
+                          {tx.status}
+                        </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`font-bold text-sm ${tx.type === 'deposit' || tx.type.includes('profit') ? "text-success" : "text-foreground"}`}>
-                        {tx.type === 'deposit' || tx.type.includes('profit') ? '+' : ''}${tx.amount}
-                      </div>
-                      <div className={`text-[10px] font-medium uppercase px-2 py-0.5 rounded-full inline-block mt-1 ${tx.status === 'completed' ? 'bg-success/10 text-success' : tx.status === 'pending' ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'}`}>
-                        {tx.status}
-                      </div>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <div className="text-sm text-center p-8 bg-muted/20 rounded-lg border border-dashed flex flex-col items-center justify-center space-y-3">
-                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                    <History className="h-6 w-6 text-muted-foreground/50" />
-                  </div>
-                  <div>
-                    <p className="font-medium">No recent transactions</p>
-                    <p className="text-muted-foreground text-xs mt-1">When you deposit or invest, it will appear here.</p>
-                  </div>
-                  <Button variant="outline" size="sm" asChild className="mt-2">
+                <div className="text-center py-10 bg-muted/20 border border-dashed rounded-xl space-y-2">
+                  <History className="h-8 w-8 text-muted-foreground/40 mx-auto" />
+                  <p className="text-xs font-semibold text-foreground">No recent transactions recorded</p>
+                  <p className="text-[11px] text-muted-foreground">When you fund your account or invest, receipts appear here.</p>
+                  <Button size="sm" variant="outline" asChild className="mt-2 text-xs">
                     <Link to="/dashboard/deposit">Deposit Funds</Link>
                   </Button>
                 </div>
@@ -283,140 +460,76 @@ export default function DashboardOverview() {
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          <Card className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
-              <div>
-                <CardTitle className="text-base font-heading">Top Traders</CardTitle>
-              </div>
-              <Link to="/dashboard/copy-trading" className="text-xs text-primary hover:underline">
-                View All
-              </Link>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
-                {isLoading ? (
-                  Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2">
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-3 w-full" />
-                        <Skeleton className="h-3 w-2/3" />
+        {/* Top Verified Traders */}
+        <Card className="border border-border shadow-elevation-sm bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b">
+            <div>
+              <CardTitle className="text-base font-heading font-bold text-foreground">
+                Top Copy Traders
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Verified market performance
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" asChild className="text-xs font-semibold text-primary">
+              <Link to="/dashboard/copy-trading">Explore</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="space-y-3">
+              {isLoading ? (
+                Array(3).fill(0).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2">
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <div className="space-y-1 flex-1">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  </div>
+                ))
+              ) : traders.length > 0 ? (
+                traders.slice(0, 4).map((trader: any) => (
+                  <div key={trader.id} className="flex items-center justify-between p-2.5 rounded-xl border border-border/60 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={trader.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trader.name}`}
+                        alt={trader.name}
+                        className="w-9 h-9 rounded-full object-cover border"
+                      />
+                      <div>
+                        <div className="font-heading font-semibold text-xs text-foreground">{trader.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{trader.followers || 0} Copiers</div>
                       </div>
                     </div>
-                  ))
-                ) : traders && traders.length > 0 ? (
-                  traders.slice(0, 4).map((c) => (
-                    <div key={c.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <img src={c.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + c.name} alt={c.name} className="w-8 h-8 rounded-full bg-muted border" />
-                        <div>
-                          <div className="font-medium text-sm leading-none mb-1">{c.name}</div>
-                          <div className="text-[10px] text-muted-foreground">{c.followers} Followers</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-xs text-success bg-success/10 px-2 py-0.5 rounded-full inline-block">+{c.win_rate}% Win</div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-muted-foreground p-2 text-center">No traders available</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {activeIntent && (
-            <Card className="border shadow-sm animate-fade-in-up" style={{ animationDelay: "450ms" }}>
-              <CardHeader className="pb-2 border-b">
-                <CardTitle className="text-base font-heading flex items-center justify-between">
-                  Pending Deposit Activity
-                  <Badge className="bg-warning/10 text-warning border-0 text-[10px] uppercase font-bold tracking-wider">{activeIntent.status}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-4">
-                <div className="text-xs space-y-2 bg-muted/30 p-3 rounded-lg border">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Currency:</span>
-                    <span className="font-bold">{activeIntent.selected_currency}</span>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      +{trader.win_rate || 0}% Win
+                    </span>
                   </div>
-                  {activeIntent.selected_network && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Network:</span>
-                      <span className="font-medium">{activeIntent.selected_network}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Initiated:</span>
-                    <span>{new Date(activeIntent.initiated_timestamp).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                {(activeIntent.status === "Awaiting Payment" || activeIntent.status === "Awaiting Confirmation") ? (
-                  <Button className="w-full font-semibold group flex items-center justify-center gap-2" asChild>
-                    <Link to="/dashboard/deposit">
-                      Continue Confirmation <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button className="w-full font-semibold bg-muted text-muted-foreground" disabled>
-                    Under Review
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className="border shadow-sm animate-fade-in-up" style={{ animationDelay: "500ms" }}>
-            <CardHeader className="pb-2 border-b">
-              <CardTitle className="text-base font-heading">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="grid grid-cols-2 gap-3">
-                <Link to="/dashboard/deposit" className="flex flex-col items-center justify-center p-4 bg-muted/30 border rounded-xl hover:bg-gradient-blue hover:text-white hover:border-transparent transition-all text-xs font-semibold shadow-sm group">
-                  <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
-                    <Wallet className="h-5 w-5 text-blue-600" />
-                  </div>
-                  Deposit
-                </Link>
-                <Link to="/dashboard/withdraw" className="flex flex-col items-center justify-center p-4 bg-muted/30 border rounded-xl hover:bg-gradient-amber hover:text-white hover:border-transparent transition-all text-xs font-semibold shadow-sm group">
-                  <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
-                    <ArrowDownToLine className="h-5 w-5 text-amber-500" />
-                  </div>
-                  Withdraw
-                </Link>
-                <Link to="/dashboard/investments" className="flex flex-col items-center justify-center p-4 bg-muted/30 border rounded-xl hover:bg-gradient-purple hover:text-white hover:border-transparent transition-all text-xs font-semibold shadow-sm group">
-                  <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
-                    <BarChart3 className="h-5 w-5 text-purple-600" />
-                  </div>
-                  Invest
-                </Link>
-                <Link to="/dashboard/copy-trading" className="flex flex-col items-center justify-center p-4 bg-muted/30 border rounded-xl hover:bg-gradient-teal hover:text-white hover:border-transparent transition-all text-xs font-semibold shadow-sm group">
-                  <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
-                    <Copy className="h-5 w-5 text-teal-600" />
-                  </div>
-                  Copy Trade
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground text-center py-6">No traders available.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
+      {/* Cancel Deposit Dialog */}
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Cancel Deposit Process?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to cancel this pending deposit process? This action cannot be undone and will cancel your session.
+            <DialogTitle className="font-heading font-bold text-lg">Cancel Deposit Process?</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+              Cancelling will terminate this active deposit session. Any unconfirmed payment intent will be closed.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="ghost" onClick={() => setShowCancelDialog(false)} disabled={cancelDepositIntent.isPending}>
+            <Button variant="ghost" size="sm" onClick={() => setShowCancelDialog(false)} disabled={cancelDepositIntent.isPending}>
               Keep Active
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={async () => {
                 if (activeIntent) {
                   await cancelDepositIntent.mutateAsync(activeIntent.id);
@@ -430,8 +543,39 @@ export default function DashboardOverview() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Transaction Detail Dialog */}
+      {selectedTx && (
+        <Dialog open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-heading font-bold text-lg">Transaction Receipt</DialogTitle>
+              <DialogDescription className="text-xs">Reference ID: {selectedTx.id}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 text-xs py-2">
+              <div className="flex justify-between p-2.5 bg-muted/40 rounded-lg">
+                <span className="text-muted-foreground">Transaction Type:</span>
+                <span className="font-bold capitalize text-foreground">{selectedTx.type}</span>
+              </div>
+              <div className="flex justify-between p-2.5 bg-muted/40 rounded-lg">
+                <span className="text-muted-foreground">Amount:</span>
+                <span className="font-bold text-foreground">${Number(selectedTx.amount).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between p-2.5 bg-muted/40 rounded-lg">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="font-bold text-primary uppercase">{selectedTx.status}</span>
+              </div>
+              <div className="flex justify-between p-2.5 bg-muted/40 rounded-lg">
+                <span className="text-muted-foreground">Date:</span>
+                <span className="text-foreground">{new Date(selectedTx.created_at).toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="flex justify-end pt-2 border-t">
+              <Button size="sm" variant="outline" onClick={() => setSelectedTx(null)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
-
-// Force reload

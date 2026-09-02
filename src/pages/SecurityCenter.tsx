@@ -6,77 +6,134 @@ import { Link } from "react-router-dom";
 import {
   Shield, Lock, Eye, UserCheck, Server, AlertTriangle,
   Fingerprint, MonitorSmartphone, KeyRound, Database,
-  ShieldCheck, FileCheck, ArrowRight, CheckCircle2
+  ShieldCheck, FileCheck, ArrowRight, CheckCircle2, Globe
 } from "lucide-react";
-import heroLegal from "@/assets/hero-legal.png";
+import heroCrypto from "@/assets/hero-crypto.jpg";
 
 const accountSecurity = [
-  { icon: KeyRound, title: "Strong Password Requirements", desc: "All passwords must meet minimum complexity requirements including length, special characters, and mixed case. We never store passwords in plain text — only securely hashed values." },
-  { icon: Fingerprint, title: "Two-Factor Authentication (2FA)", desc: "Enable 2FA on your account for an additional layer of security. Even if your password is compromised, your account remains protected with a second verification step." },
-  { icon: MonitorSmartphone, title: "Session Management", desc: "Active sessions are monitored and can be reviewed from your profile settings. Inactive sessions are automatically terminated after a period of inactivity." },
-  { icon: Eye, title: "Login Monitoring", desc: "Every login attempt is logged with IP address, device type, and timestamp. Suspicious login attempts trigger automatic account protection measures." },
+  {
+    icon: KeyRound,
+    title: "Cryptographic Password Hashing",
+    desc: "Passwords are salted and hashed using modern bcrypt standards before storage. We never store or transmit plain-text credentials."
+  },
+  {
+    icon: Fingerprint,
+    title: "Two-Factor Authentication (2FA)",
+    desc: "Time-based one-time passwords (TOTP via Google Authenticator or Authy) provide a mandatory second verification layer for sensitive actions."
+  },
+  {
+    icon: MonitorSmartphone,
+    title: "Active Session Management",
+    desc: "Real-time session monitoring with automatic timeout for inactive sessions and the ability to revoke active authorizations remotely."
+  },
+  {
+    icon: Eye,
+    title: "Suspicious Login Protection",
+    desc: "Continuous monitoring for abnormal IP changes, device fingerprints, and repeated unauthorized attempts with automated rate limiting."
+  },
 ];
 
 const platformSecurity = [
-  { icon: Lock, title: "256-bit SSL Encryption", desc: "All data transmitted between your browser and our servers is encrypted using industry-standard 256-bit SSL/TLS encryption — the same standard used by major financial institutions." },
-  { icon: Server, title: "Secure Infrastructure", desc: "Our platform runs on enterprise-grade cloud infrastructure with redundant systems, automated backups, and geographic distribution to ensure availability and data integrity." },
-  { icon: ShieldCheck, title: "Continuous Monitoring", desc: "Our security team monitors the platform 24/7 for threats, vulnerabilities, and anomalous activity. Automated systems flag and respond to potential issues immediately." },
-  { icon: Database, title: "Cold Storage for Digital Assets", desc: "The majority of digital assets held on the platform are stored in offline cold storage wallets, isolated from internet-connected systems to prevent unauthorized access." },
+  {
+    icon: Lock,
+    title: "256-Bit SSL/TLS Encryption",
+    desc: "End-to-end transport layer security encrypts all communications between client browsers and AssetVault servers."
+  },
+  {
+    icon: Database,
+    title: "Multi-Signature Cold Custody",
+    desc: "Digital assets held in custody are predominantly stored offline in distributed cold-storage wallets requiring multiple keys to sign."
+  },
+  {
+    icon: Server,
+    title: "Segregated Client Balances",
+    desc: "Investor capital is held independently from corporate operating accounts, ensuring assets remain accounted for at all times."
+  },
+  {
+    icon: ShieldCheck,
+    title: "Continuous Threat Monitoring",
+    desc: "24/7 automated monitoring of system endpoints, database queries, and transaction activity to detect anomalies."
+  },
 ];
 
 const dataProtection = [
-  { icon: FileCheck, title: "Privacy Controls", desc: "You have full control over your personal data. We collect only what is necessary for account operation and regulatory compliance. You can request data export or deletion at any time." },
-  { icon: Shield, title: "Data Handling", desc: "Personal information is encrypted at rest and in transit. Access to user data is restricted to authorized personnel only, with all access logged and audited." },
-  { icon: UserCheck, title: "Regulatory Compliance", desc: "We comply with international data protection regulations including GDPR standards. Our privacy practices are regularly reviewed and updated to meet current requirements." },
+  {
+    icon: FileCheck,
+    title: "Data Minimization & Privacy",
+    desc: "We collect only information required for regulatory compliance and identity verification, maintaining strict data governance."
+  },
+  {
+    icon: Shield,
+    title: "Encrypted Data at Rest",
+    desc: "All client records and verification files are encrypted at rest using AES-256 standards with restricted internal access."
+  },
+  {
+    icon: UserCheck,
+    title: "Strict AML & KYC Protocols",
+    desc: "Identity verification processes comply with anti-money laundering regulations to prevent illicit activity and safeguard platform users."
+  },
 ];
 
 const bestPractices = [
-  "Use a strong, unique password that you don't use on other websites",
-  "Enable two-factor authentication (2FA) on your account",
-  "Never share your login credentials or 2FA codes with anyone",
-  "Verify you're on the official AssetVault website before logging in",
-  "Log out of your account when using shared or public devices",
-  "Keep your email account secure — it's your account recovery method",
-  "Report any suspicious activity to our support team immediately",
-  "Regularly review your transaction history for unauthorized activity",
+  "Utilize a unique, strong password containing letters, numbers, and special characters.",
+  "Enable Two-Factor Authentication (2FA) immediately in your profile security settings.",
+  "Never share your account credentials, verification codes, or 2FA secrets with anyone.",
+  "Verify the URL is https://assetvault.com before entering login information.",
+  "Always log out from shared or public computers after completing your transactions.",
+  "Keep your registered email account secure as it is your primary recovery mechanism.",
+  "Review your transaction history and active deposit intents on a regular basis.",
+  "Contact AssetVault support immediately if you suspect any unauthorized access.",
 ];
 
 export default function SecurityCenter() {
   return (
     <PublicLayout>
-      <SEOHead title="Security Center" description="Learn how AssetVault protects your account, funds, and personal data with industry-leading security measures." path="/security" />
+      <SEOHead
+        title="Security & Infrastructure Protection - AssetVault"
+        description="Learn how AssetVault protects investor capital, accounts, and personal data through 256-bit encryption, 2FA, and cold custody."
+        path="/security"
+      />
 
-      {/* Hero */}
-      <section className="relative min-h-[320px] flex items-center">
+      {/* Header Banner */}
+      <section className="relative bg-slate-950 text-white py-20 lg:py-28 border-b overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroLegal} alt="Security Center" className="w-full h-full object-cover" width={1920} height={640} />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
+          <img src={heroCrypto} alt="Security Center AssetVault" className="w-full h-full object-cover opacity-40 hero-kenburns" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
         </div>
-        <div className="container relative z-10 py-16 md:py-20 text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 text-sm bg-white/10 text-white backdrop-blur-sm">
-            <Shield className="h-4 w-4 text-accent" /> Platform Security
+        <div className="container text-left space-y-4 max-w-3xl relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider text-slate-300 border border-white/15 backdrop-blur-sm">
+            Security & Compliance
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white">Security Center</h1>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg">How AssetVault protects your account, investments, and personal data.</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-white drop-shadow-md">
+            Security Center
+          </h1>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed drop-shadow-md max-w-2xl">
+            Multi-layered security protocols designed to protect your account, digital asset custody, and personal records.
+          </p>
         </div>
       </section>
 
       {/* Account Security */}
-      <section className="py-16">
-        <div className="container max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Account Security</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Multiple layers of protection keep your account safe from unauthorized access.</p>
+      <section className="py-16 lg:py-20">
+        <div className="container max-w-5xl space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Account-Level Protection
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Granular access controls and verification safeguards for your login and profile.
+            </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+
+          <div className="grid sm:grid-cols-2 gap-6">
             {accountSecurity.map((item) => (
-              <Card key={item.title} className="hover:shadow-md transition-shadow">
+              <Card key={item.title} className="border border-border shadow-elevation-sm bg-card">
                 <CardContent className="p-6 space-y-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
-                    <item.icon className="h-5 w-5 text-primary" />
+                  <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <item.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <h3 className="font-heading font-bold text-base text-foreground">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -84,22 +141,27 @@ export default function SecurityCenter() {
         </div>
       </section>
 
-      {/* Platform Security */}
-      <section className="py-16 bg-muted/30">
-        <div className="container max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Platform Security</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Our infrastructure is built with security at every layer.</p>
+      {/* Platform Infrastructure */}
+      <section className="py-16 lg:py-20 bg-muted/30 border-y">
+        <div className="container max-w-5xl space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Platform & Custody Infrastructure
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Institutional safeguards for asset storage, server encryption, and fund segregation.
+            </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+
+          <div className="grid sm:grid-cols-2 gap-6">
             {platformSecurity.map((item) => (
-              <Card key={item.title} className="hover:shadow-md transition-shadow">
+              <Card key={item.title} className="border border-border shadow-elevation-sm bg-card">
                 <CardContent className="p-6 space-y-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
-                    <item.icon className="h-5 w-5 text-primary" />
+                  <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <item.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <h3 className="font-heading font-bold text-base text-foreground">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -108,21 +170,26 @@ export default function SecurityCenter() {
       </section>
 
       {/* Data Protection */}
-      <section className="py-16">
-        <div className="container max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Data Protection</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Your personal data is handled with care and in compliance with international standards.</p>
+      <section className="py-16 lg:py-20">
+        <div className="container max-w-5xl space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Data Privacy & Governance
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              How we protect your confidential records and identity verification documents.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+
+          <div className="grid sm:grid-cols-3 gap-6">
             {dataProtection.map((item) => (
-              <Card key={item.title} className="hover:shadow-md transition-shadow">
+              <Card key={item.title} className="border border-border shadow-elevation-sm bg-card">
                 <CardContent className="p-6 space-y-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
-                    <item.icon className="h-5 w-5 text-primary" />
+                  <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <item.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <h3 className="font-heading font-bold text-sm text-foreground">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -131,19 +198,24 @@ export default function SecurityCenter() {
       </section>
 
       {/* Security Best Practices */}
-      <section className="py-16 bg-muted/30">
-        <div className="container max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Security Best Practices</h2>
-            <p className="text-muted-foreground">Follow these recommendations to keep your account secure.</p>
+      <section className="py-16 bg-muted/40 border-t">
+        <div className="container max-w-3xl space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Client Security Checklist
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Recommended actions every investor should follow to maximize account security.
+            </p>
           </div>
-          <Card>
-            <CardContent className="p-6 md:p-8">
-              <ul className="space-y-4">
+
+          <Card className="border border-border shadow-elevation-sm bg-card">
+            <CardContent className="p-6 sm:p-8">
+              <ul className="space-y-3.5">
                 {bestPractices.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                    <span>{tip}</span>
+                  <li key={i} className="flex items-start gap-3 text-xs sm:text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground leading-relaxed">{tip}</span>
                   </li>
                 ))}
               </ul>
@@ -152,18 +224,25 @@ export default function SecurityCenter() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16">
-        <div className="container text-center space-y-5">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <AlertTriangle className="h-5 w-5 text-warning" />
-            <p className="text-sm text-muted-foreground font-medium">If you suspect unauthorized access to your account, contact our support team immediately.</p>
+      {/* Support & Incident Response CTA */}
+      <section className="py-16 bg-slate-950 text-white border-t">
+        <div className="container text-center max-w-2xl space-y-5">
+          <div className="inline-flex items-center justify-center gap-2 text-warning text-xs font-semibold uppercase tracking-wider">
+            <AlertTriangle className="h-4 w-4" /> Security Inquiries & Reporting
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild>
-              <Link to="/contact">Contact Support <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold text-white">
+            Need Security Assistance?
+          </h2>
+          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            If you detect suspicious account activity or have questions regarding our security protocols, contact our support team immediately.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Button size="lg" asChild className="font-semibold shadow-sm">
+              <Link to="/contact">
+                Contact Security Team <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button size="lg" variant="outline" asChild className="border-white/30 text-white hover:bg-white/10 font-semibold">
               <Link to="/trust">View Trust Center</Link>
             </Button>
           </div>

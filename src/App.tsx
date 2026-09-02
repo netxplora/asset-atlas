@@ -9,7 +9,6 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { SkipToContent } from "@/components/SkipToContent";
-import { BackToTop } from "@/components/BackToTop";
 import { ProtectedAdminRoute } from "@/components/ProtectedAdminRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BrandProvider } from "@/components/BrandProvider";
@@ -94,7 +93,7 @@ const App = () => (
             <AnnouncementBanner />
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <ScrollToTop />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
@@ -169,7 +168,6 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
-              <BackToTop />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>

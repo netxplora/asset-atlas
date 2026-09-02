@@ -153,7 +153,7 @@ export default function AdminDeposits() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Deposit Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Deposit Management</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {viewMode === "deposits" 
               ? (isLoading ? 'Loading...' : `${deposits.length} total · ${deposits.filter((d: any) => d.status === "pending").length} pending`)

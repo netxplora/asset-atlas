@@ -49,7 +49,7 @@ export default function AdminContent() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Content & Page Builder</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Content & Page Builder</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage website pages, homepage layouts, and trust indicators.</p>
         </div>
       </div>

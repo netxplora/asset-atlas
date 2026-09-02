@@ -90,7 +90,7 @@ export default function AdminUsers() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">User Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">User Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{isLoading ? "Loading..." : `${totalUsers} users · ${adminCount} admins · ${verifiedCount} verified`}</p>
         </div>
         <div className="relative w-full sm:w-72">

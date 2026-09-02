@@ -151,7 +151,7 @@ export default function AdminTransactions() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Transaction Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Transaction Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{isLoading ? 'Loading...' : `${transactions.length} total records`}</p>
         </div>
         <Button onClick={() => handleOpenDialog()} className="gap-2 shadow-sm">

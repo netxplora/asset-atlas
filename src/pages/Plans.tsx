@@ -1,51 +1,54 @@
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { PublicLayout } from "@/components/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
-import { CheckCircle2, Shield, TrendingUp, Clock, Calculator, ArrowRight, AlertTriangle } from "lucide-react";
-import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SEOHead } from "@/components/SEOHead";
+import {
+  CheckCircle2, ShieldCheck, TrendingUp, Clock, Calculator,
+  ArrowRight, AlertTriangle, HelpCircle, BarChart3, Lock
+} from "lucide-react";
 import heroForex from "@/assets/hero-forex.jpg";
 import heroCrypto from "@/assets/hero-crypto.jpg";
 import heroCommodities from "@/assets/hero-commodities.jpg";
+import heroPlans from "@/assets/hero-main.jpg";
 
 const plans = {
   forex: [
-    { tier: "Starter", min: "$100", roi: "8%", duration: "30 days", risk: "Low", recommended: "New investors starting with Forex" },
-    { tier: "Silver", min: "$1,000", roi: "12%", duration: "60 days", risk: "Medium", recommended: "Intermediate investors seeking growth" },
-    { tier: "Gold", min: "$5,000", roi: "18%", duration: "90 days", risk: "Medium", recommended: "Experienced investors with capital" },
-    { tier: "Elite", min: "$25,000", roi: "25%", duration: "180 days", risk: "High", recommended: "High-net-worth long-term investors" },
+    { tier: "Starter", min: "$100", rawMin: 100, roi: "8%", rawRoi: 8, duration: "30 Days", risk: "Low", recommended: "New investors beginning in currency markets" },
+    { tier: "Silver", min: "$1,000", rawMin: 1000, roi: "12%", rawRoi: 12, duration: "60 Days", risk: "Medium", recommended: "Intermediate investors seeking capital growth" },
+    { tier: "Gold", min: "$5,000", rawMin: 5000, roi: "18%", rawRoi: 18, duration: "90 Days", risk: "Medium", recommended: "Experienced investors with larger allocations" },
+    { tier: "Elite", min: "$25,000", rawMin: 25000, roi: "25%", rawRoi: 25, duration: "180 Days", risk: "High", recommended: "High-net-worth long-term strategies" },
   ],
   crypto: [
-    { tier: "Starter", min: "$250", roi: "10%", duration: "30 days", risk: "Medium", recommended: "New crypto investors" },
-    { tier: "Silver", min: "$2,500", roi: "15%", duration: "60 days", risk: "Medium", recommended: "Investors comfortable with volatility" },
-    { tier: "Gold", min: "$10,000", roi: "22%", duration: "90 days", risk: "High", recommended: "Experienced crypto investors" },
-    { tier: "Elite", min: "$50,000", roi: "30%", duration: "180 days", risk: "High", recommended: "Institutional-level crypto investors" },
+    { tier: "Starter", min: "$250", rawMin: 250, roi: "10%", rawRoi: 10, duration: "30 Days", risk: "Medium", recommended: "New digital asset investors" },
+    { tier: "Silver", min: "$2,500", rawMin: 2500, roi: "15%", rawRoi: 15, duration: "60 Days", risk: "Medium", recommended: "Investors comfortable with market movements" },
+    { tier: "Gold", min: "$10,000", rawMin: 10000, roi: "22%", rawRoi: 22, duration: "90 Days", risk: "High", recommended: "Experienced digital currency investors" },
+    { tier: "Elite", min: "$50,000", rawMin: 50000, roi: "30%", rawRoi: 30, duration: "180 Days", risk: "High", recommended: "Institutional-scale crypto strategies" },
   ],
   commodities: [
-    { tier: "Starter", min: "$500", roi: "6%", duration: "30 days", risk: "Low", recommended: "Conservative investors seeking stability" },
-    { tier: "Silver", min: "$3,000", roi: "10%", duration: "60 days", risk: "Low", recommended: "Long-term portfolio diversifiers" },
-    { tier: "Gold", min: "$15,000", roi: "15%", duration: "90 days", risk: "Medium", recommended: "Balanced investors with capital" },
-    { tier: "Elite", min: "$75,000", roi: "20%", duration: "180 days", risk: "Medium", recommended: "High-net-worth commodity investors" },
+    { tier: "Starter", min: "$500", rawMin: 500, roi: "6%", rawRoi: 6, duration: "30 Days", risk: "Low", recommended: "Conservative investors seeking stability" },
+    { tier: "Silver", min: "$3,000", rawMin: 3000, roi: "10%", rawRoi: 10, duration: "60 Days", risk: "Low", recommended: "Long-term portfolio diversification" },
+    { tier: "Gold", min: "$15,000", rawMin: 15000, roi: "15%", rawRoi: 15, duration: "90 Days", risk: "Medium", recommended: "Balanced physical asset allocations" },
+    { tier: "Elite", min: "$75,000", rawMin: 75000, roi: "20%", rawRoi: 20, duration: "180 Days", risk: "Medium", recommended: "High-net-worth commodity investors" },
   ],
 };
 
-const tierColors: Record<string, string> = {
-  Starter: "bg-muted text-muted-foreground",
-  Silver: "bg-muted text-foreground",
-  Gold: "bg-accent/20 text-accent-foreground",
-  Elite: "bg-primary/10 text-primary",
+const categoryLabels: Record<string, string> = {
+  forex: "Forex Trading",
+  crypto: "Cryptocurrency",
+  commodities: "Commodities",
 };
 
-const heroImages: Record<string, string> = { forex: heroForex, crypto: heroCrypto, commodities: heroCommodities };
-
 export default function Plans() {
-  const [calcAmount, setCalcAmount] = useState<string>("1000");
+  const { user } = useAuth();
+  const [calcAmount, setCalcAmount] = useState<string>("2500");
   const [calcCategory, setCalcCategory] = useState<"forex" | "crypto" | "commodities">("forex");
   const [calcPlanIdx, setCalcPlanIdx] = useState<string>("1");
 
@@ -53,65 +56,71 @@ export default function Plans() {
     const amount = parseFloat(calcAmount) || 0;
     const planList = plans[calcCategory];
     const plan = planList[parseInt(calcPlanIdx)] || planList[0];
-    
-    const roiPercent = parseFloat(plan.roi.replace("%", ""));
+    const roiPercent = plan.rawRoi;
     const profit = amount * (roiPercent / 100);
     const total = amount + profit;
-    
     return { profit, total, plan };
   }, [calcAmount, calcCategory, calcPlanIdx]);
 
+  const targetLink = user ? "/dashboard/investments" : "/register";
+
   return (
     <PublicLayout>
-      <SEOHead title="Investment Plans" description="Explore our Forex, Crypto, and Commodities investment plans designed for consistent ROI." path="/plans" />
-      <section className="relative min-h-[400px] flex items-center">
+      <SEOHead
+        title="Investment Plans & Returns - AssetVault"
+        description="Review structured investment plans across Forex, Cryptocurrency, and Commodities. Transparent minimums, durations, and return calculations."
+        path="/plans"
+      />
+
+      {/* Header Banner */}
+      <section className="relative bg-slate-950 text-white py-20 lg:py-28 border-b overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroForex} alt="Investment Plans" className="w-full h-full object-cover" width={1920} height={640} />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
+          <img src={heroPlans} alt="Investment Plans AssetVault" className="w-full h-full object-cover opacity-50 hero-kenburns" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/25 to-transparent" />
         </div>
-        <div className="container relative z-10 py-16 text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">Investment Plans</h1>
-          <p className="text-white/80 max-w-xl mx-auto text-lg">Choose a plan that fits your investment goals across Forex, Crypto, and Commodities with transparent ROI.</p>
-        </div>
-      </section>
-
-      {/* Category images */}
-      <section className="py-12 border-b">
-        <div className="container grid md:grid-cols-3 gap-6">
-          {[
-            { title: "Forex", desc: "Currency pairs with competitive spreads", image: heroForex },
-            { title: "Crypto", desc: "Bitcoin, Ethereum & top altcoins", image: heroCrypto },
-            { title: "Commodities", desc: "Gold, Silver, Oil & more", image: heroCommodities },
-          ].map((c) => (
-            <div key={c.title} className="relative rounded-lg overflow-hidden h-40 group">
-              <img src={c.image} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 flex flex-col justify-end p-4">
-                <h3 className="text-white font-bold text-lg">{c.title}</h3>
-                <p className="text-white/70 text-sm">{c.desc}</p>
-              </div>
-            </div>
-          ))}
+        <div className="container text-left space-y-4 max-w-3xl relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider text-slate-300 border border-white/15 backdrop-blur-sm">
+            Transparent Pricing & Schedules
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-white drop-shadow-md">
+            Structured Investment Plans
+          </h1>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed drop-shadow-md max-w-2xl">
+            Select a plan configured for your capital requirements and horizon across Forex, Cryptocurrency, and Commodities.
+          </p>
         </div>
       </section>
 
-      {/* Investment Calculator */}
-      <section className="py-12 bg-muted/10">
-        <div className="container max-w-4xl">
-          <Card className="border-border shadow-elevation-md">
+      {/* Interactive Calculator */}
+      <section className="py-12 lg:py-20 mesh-bg border-b">
+        <div className="container max-w-4xl relative z-10 reveal">
+          <Card className="shadow-elevation-lg glass-card">
             <CardHeader className="text-center pb-2">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <Calculator className="h-6 w-6 text-primary" />
+              <div className="mx-auto icon-badge-blue mb-4">
+                <Calculator className="h-6 w-6" />
               </div>
-              <CardTitle className="text-2xl font-heading">Investment Calculator</CardTitle>
-              <p className="text-muted-foreground">Forecast your potential returns across our premium plans.</p>
+              <CardTitle className="text-2xl font-heading font-bold text-foreground">
+                Investment Return Calculator
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Calculate your estimated returns based on plan duration and capital allocation.
+              </p>
             </CardHeader>
             <CardContent className="p-6 md:p-8">
               <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div className="space-y-2">
-                    <Label>Investment Category</Label>
-                    <Select value={calcCategory} onValueChange={(v: any) => { setCalcCategory(v); setCalcPlanIdx("0"); }}>
-                      <SelectTrigger className="h-12"><SelectValue placeholder="Select Category" /></SelectTrigger>
+                    <Label className="text-xs font-semibold text-foreground">Asset Class</Label>
+                    <Select
+                      value={calcCategory}
+                      onValueChange={(v: any) => {
+                        setCalcCategory(v);
+                        setCalcPlanIdx("0");
+                      }}
+                    >
+                      <SelectTrigger className="h-11 text-sm bg-background">
+                        <SelectValue placeholder="Select Asset Class" />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="forex">Forex Trading</SelectItem>
                         <SelectItem value="crypto">Cryptocurrency</SelectItem>
@@ -119,15 +128,17 @@ export default function Plans() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label>Investment Plan</Label>
+                    <Label className="text-xs font-semibold text-foreground">Investment Tier</Label>
                     <Select value={calcPlanIdx} onValueChange={setCalcPlanIdx}>
-                      <SelectTrigger className="h-12"><SelectValue placeholder="Select Plan" /></SelectTrigger>
+                      <SelectTrigger className="h-11 text-sm bg-background">
+                        <SelectValue placeholder="Select Tier" />
+                      </SelectTrigger>
                       <SelectContent>
                         {plans[calcCategory].map((p, idx) => (
                           <SelectItem key={p.tier} value={idx.toString()}>
-                            {p.tier} ({p.roi} in {p.duration})
+                            {p.tier} Tier — {p.roi} ({p.duration})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -135,35 +146,44 @@ export default function Plans() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Investment Amount (USD)</Label>
+                    <Label className="text-xs font-semibold text-foreground">Investment Amount (USD)</Label>
                     <div className="relative">
-                      <span className="absolute left-4 top-3 text-muted-foreground font-medium">$</span>
-                      <Input 
-                        type="number" 
-                        className="pl-8 h-12 text-lg" 
-                        value={calcAmount} 
-                        onChange={(e) => setCalcAmount(e.target.value)} 
-                        placeholder="1000" 
+                      <span className="absolute left-3.5 top-2.5 text-muted-foreground font-medium text-sm">$</span>
+                      <Input
+                        type="number"
+                        className="pl-8 h-11 text-base bg-background font-medium"
+                        value={calcAmount}
+                        onChange={(e) => setCalcAmount(e.target.value)}
+                        placeholder="2500"
+                        min="50"
                       />
                     </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Minimum for {calcResult.plan.tier}: {calcResult.plan.min}
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-muted/30 p-8 rounded-2xl border flex flex-col justify-center h-full space-y-6 text-center">
-                  <div>
-                    <p className="text-sm text-muted-foreground font-medium mb-1">Estimated Profit ({calcResult.plan.duration})</p>
-                    <div className="text-4xl font-bold text-success">+${calcResult.profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                  </div>
-                  
-                  <div className="h-px bg-border w-full" />
-                  
-                  <div>
-                    <p className="text-sm text-muted-foreground font-medium mb-1">Total Expected Return</p>
-                    <div className="text-3xl font-bold text-foreground">${calcResult.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                {/* Calculation Result Display */}
+                <div className="bg-background/40 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-border flex flex-col justify-between space-y-6 shadow-inner">
+                  <div className="space-y-1">
+                    <span className="text-xs text-muted-foreground font-medium">Estimated Net Profit ({calcResult.plan.duration})</span>
+                    <div className="text-3xl sm:text-4xl font-heading font-bold text-success count-in">
+                      +${calcResult.profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
                   </div>
 
-                  <Button className="w-full h-12 font-semibold text-base mt-4" asChild>
-                    <Link to="/register">Start Investing <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <div className="pt-4 border-t border-border/60 space-y-1">
+                    <span className="text-xs text-muted-foreground font-medium">Total Projected Return</span>
+                    <div className="text-2xl font-heading font-bold text-foreground">
+                      ${calcResult.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+
+                  <Button asChild className="w-full h-11 font-semibold shadow-md glow-primary">
+                    <Link to={targetLink}>
+                      {user ? "Allocate Capital" : "Start Investing Now"} <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -172,96 +192,134 @@ export default function Plans() {
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="container">
+      {/* Plan Tiers Grid by Tab */}
+      <section className="py-16 lg:py-20">
+        <div className="container space-y-12">
           <Tabs defaultValue="forex" className="space-y-8">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
-              <TabsTrigger value="forex">Forex</TabsTrigger>
-              <TabsTrigger value="crypto">Crypto</TabsTrigger>
-              <TabsTrigger value="commodities">Commodities</TabsTrigger>
-            </TabsList>
+            <div className="flex justify-center">
+              <TabsList className="grid w-full max-w-md grid-cols-3 h-11">
+                <TabsTrigger value="forex" className="font-semibold text-xs sm:text-sm">Forex</TabsTrigger>
+                <TabsTrigger value="crypto" className="font-semibold text-xs sm:text-sm">Crypto</TabsTrigger>
+                <TabsTrigger value="commodities" className="font-semibold text-xs sm:text-sm">Commodities</TabsTrigger>
+              </TabsList>
+            </div>
 
             {Object.entries(plans).map(([key, list]) => (
-              <TabsContent key={key} value={key} className="animate-fade-in-up">
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                  {list.map((p) => (
-                    <Card key={p.tier} className={`relative overflow-hidden transition-all duration-300 hover:shadow-elevation-lg hover:-translate-y-1 ${p.tier === "Gold" ? "border-accent shadow-elevation-md ring-1 ring-accent/20" : ""}`}>
-                      {p.tier === "Gold" && (
-                        <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-bl-lg z-10">Popular</div>
-                      )}
-                      <CardHeader className="pb-3">
-                        <Badge className={tierColors[p.tier]}>{p.tier}</Badge>
-                        <CardTitle className="text-lg mt-2 font-heading">{p.tier} {key.charAt(0).toUpperCase() + key.slice(1)} Plan</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="text-3xl font-bold text-primary">{p.roi} <span className="text-sm font-normal text-muted-foreground">ROI</span></div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-muted-foreground">Min. Investment</span><span className="font-medium">{p.min}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-medium">{p.duration}</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Risk Level</span><span className={`font-medium ${p.risk === 'Low' ? 'text-success' : p.risk === 'Medium' ? 'text-warning' : 'text-destructive'}`}>{p.risk}</span></div>
-                        </div>
-                        <div className="text-xs text-muted-foreground bg-muted/50 rounded-md p-2 text-center">
-                          <span className="font-medium text-foreground">Recommended for:</span> {p.recommended}
-                        </div>
-                        <Button className={p.tier === "Gold" ? "w-full bg-accent text-accent-foreground hover:bg-accent/90" : "w-full"} variant={p.tier === "Gold" ? "default" : "outline"} asChild>
-                          <Link to="/register">Invest Now</Link>
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+              <TabsContent key={key} value={key} className="space-y-12">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
+                  {list.map((p, i) => {
+                    const isFeatured = p.tier === "Gold";
+                    return (
+                      <Card
+                        key={p.tier}
+                        className={`relative flex flex-col justify-between transition-all duration-300 reveal glass-card card-hover overflow-hidden ${
+                          isFeatured ? "border-primary ring-2 ring-primary/20" : ""
+                        }`}
+                      >
+                        {isFeatured && (
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-full pointer-events-none" />
+                        )}
+                        {isFeatured && (
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full shadow-sm">
+                            Most Selected
+                          </div>
+                        )}
+
+                        <CardHeader className="pb-3 pt-6 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className="font-semibold text-xs">
+                              {p.tier} Tier
+                            </Badge>
+                            <span className={`text-[11px] font-semibold ${p.risk === 'Low' ? 'text-success' : p.risk === 'Medium' ? 'text-warning' : 'text-destructive'}`}>
+                              {p.risk} Risk
+                            </span>
+                          </div>
+                          <CardTitle className="text-xl font-heading font-bold text-foreground">
+                            {p.roi} <span className="text-xs font-normal text-muted-foreground">ROI</span>
+                          </CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4 flex-1 flex flex-col justify-between">
+                          <div className="space-y-2 text-xs pt-2 border-t border-border">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Minimum Capital:</span>
+                              <span className="font-semibold text-foreground">{p.min}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Duration:</span>
+                              <span className="font-semibold text-foreground">{p.duration}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Asset Focus:</span>
+                              <span className="font-semibold text-foreground">{categoryLabels[key]}</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-muted/40 p-2.5 rounded-lg text-[11px] text-muted-foreground leading-relaxed">
+                            <strong className="text-foreground">Suitability:</strong> {p.recommended}
+                          </div>
+
+                          <Button
+                            asChild
+                            variant={isFeatured ? "default" : "outline"}
+                            className="w-full font-semibold"
+                          >
+                            <Link to={targetLink}>
+                              Select Plan <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
 
-                {/* Feature Comparison Table */}
-                <div className="bg-card rounded-xl border shadow-sm overflow-hidden mt-12 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-                  <div className="p-6 border-b bg-muted/30">
-                    <h3 className="text-xl font-heading font-bold text-center">Compare {key.charAt(0).toUpperCase() + key.slice(1)} Tiers</h3>
+                {/* Plan Comparison Matrix */}
+                <div className="bg-card rounded-xl border border-border shadow-elevation-sm overflow-hidden">
+                  <div className="p-5 border-b bg-muted/40">
+                    <h3 className="font-heading font-bold text-base text-foreground text-center sm:text-left">
+                      Feature Comparison — {categoryLabels[key]}
+                    </h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-muted/50 text-muted-foreground">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-muted/50 text-muted-foreground border-b">
                         <tr>
-                          <th className="p-4 font-medium">Features</th>
-                          <th className="p-4 font-medium text-center">Starter</th>
-                          <th className="p-4 font-medium text-center">Silver</th>
-                          <th className="p-4 font-medium text-center">Gold</th>
-                          <th className="p-4 font-medium text-center text-accent">Elite</th>
+                          <th className="p-4 font-semibold">Feature & Coverage</th>
+                          <th className="p-4 font-semibold text-center">Starter</th>
+                          <th className="p-4 font-semibold text-center">Silver</th>
+                          <th className="p-4 font-semibold text-center">Gold</th>
+                          <th className="p-4 font-semibold text-center text-primary">Elite</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        <tr className="hover:bg-muted/30 transition-colors">
-                          <td className="p-4 font-medium">Dedicated Account Manager</td>
+                        <tr className="hover:bg-muted/20">
+                          <td className="p-4 font-medium text-foreground">Dedicated Account Specialist</td>
                           <td className="p-4 text-center text-muted-foreground">—</td>
                           <td className="p-4 text-center"><CheckCircle2 className="h-4 w-4 mx-auto text-success" /></td>
                           <td className="p-4 text-center"><CheckCircle2 className="h-4 w-4 mx-auto text-success" /></td>
                           <td className="p-4 text-center"><CheckCircle2 className="h-4 w-4 mx-auto text-success" /></td>
                         </tr>
-                        <tr className="hover:bg-muted/30 transition-colors">
-                          <td className="p-4 font-medium">Daily Market Analysis</td>
+                        <tr className="hover:bg-muted/20">
+                          <td className="p-4 font-medium text-foreground">Daily Performance Reports</td>
                           <td className="p-4 text-center text-muted-foreground">—</td>
                           <td className="p-4 text-center text-muted-foreground">—</td>
                           <td className="p-4 text-center"><CheckCircle2 className="h-4 w-4 mx-auto text-success" /></td>
                           <td className="p-4 text-center"><CheckCircle2 className="h-4 w-4 mx-auto text-success" /></td>
                         </tr>
-                        <tr className="hover:bg-muted/30 transition-colors">
-                          <td className="p-4 font-medium">Priority Withdrawals</td>
+                        <tr className="hover:bg-muted/20">
+                          <td className="p-4 font-medium text-foreground">Withdrawal Processing Window</td>
                           <td className="p-4 text-center">Standard (24h)</td>
                           <td className="p-4 text-center">Standard (24h)</td>
                           <td className="p-4 text-center">Priority (12h)</td>
-                          <td className="p-4 text-center font-medium text-accent">Instant</td>
+                          <td className="p-4 text-center font-bold text-primary">Expedited</td>
                         </tr>
-                        <tr className="hover:bg-muted/30 transition-colors">
-                          <td className="p-4 font-medium">Risk Management Strategy</td>
+                        <tr className="hover:bg-muted/20">
+                          <td className="p-4 font-medium text-foreground">Risk Management Controls</td>
                           <td className="p-4 text-center">Standard</td>
                           <td className="p-4 text-center">Standard</td>
-                          <td className="p-4 text-center">Advanced</td>
-                          <td className="p-4 text-center">Custom</td>
-                        </tr>
-                        <tr className="hover:bg-muted/30 transition-colors">
-                          <td className="p-4 font-medium">Monthly Strategy Call</td>
-                          <td className="p-4 text-center text-muted-foreground">—</td>
-                          <td className="p-4 text-center text-muted-foreground">—</td>
-                          <td className="p-4 text-center text-muted-foreground">—</td>
-                          <td className="p-4 text-center"><CheckCircle2 className="h-4 w-4 mx-auto text-success" /></td>
+                          <td className="p-4 text-center">Advanced Stop-Loss</td>
+                          <td className="p-4 text-center">Custom Multi-Layer</td>
                         </tr>
                       </tbody>
                     </table>
@@ -273,60 +331,27 @@ export default function Plans() {
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="py-16 bg-muted/30">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-10">Why Invest With Us</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: TrendingUp, title: "Consistent Returns", desc: "Our managed plans deliver reliable ROI through expert strategies." },
-              { icon: Shield, title: "Capital Protection", desc: "Risk management protocols to safeguard your investments." },
-              { icon: Clock, title: "Flexible Durations", desc: "Choose plans from 30 to 180 days based on your goals." },
-              { icon: CheckCircle2, title: "Transparent Fees", desc: "No hidden charges. What you see is what you get." },
-            ].map((f) => (
-              <Card key={f.title}>
-                <CardContent className="p-6 text-center space-y-3">
-                  <f.icon className="h-8 w-8 mx-auto text-primary" />
-                  <h3 className="font-semibold">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground">{f.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Risk Warning */}
-      <section className="py-12">
+      {/* Risk Notice */}
+      <section className="py-12 bg-muted/30 border-t">
         <div className="container max-w-3xl">
-          <Card className="border-warning/30 bg-warning/5">
-            <CardContent className="p-6 space-y-3">
+          <Card className="border border-warning/30 bg-warning/5 shadow-sm">
+            <CardContent className="p-6 space-y-2">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
-                <h3 className="font-bold text-sm">Investment Risk Notice</h3>
+                <h3 className="font-heading font-bold text-sm text-foreground">Investment Risk Notice</h3>
               </div>
-              <p className="text-sm text-muted-foreground">All investment plans involve risk. The stated ROI figures represent expected returns based on historical performance and are not guaranteed. Past performance is not indicative of future results. Only invest funds you can afford to lose.</p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/risk-disclosure">Read Risk Disclosure <ArrowRight className="ml-2 h-3 w-3" /></Link>
-              </Button>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Stated returns reflect historical target yields and model performance. All financial market investments carry risk of capital loss. Verify that your chosen plan corresponds to your risk tolerance before committing capital.
+              </p>
+              <div className="pt-2">
+                <Button variant="outline" size="sm" asChild className="text-xs font-semibold">
+                  <Link to="/risk-disclosure">
+                    Read Full Risk Disclosure <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 bg-muted/30">
-        <div className="container text-center space-y-5">
-          <h2 className="text-2xl font-bold">Not Sure Which Plan to Choose?</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto text-sm">Use our investment calculator above to compare potential returns, or contact our team for personalized guidance.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild>
-              <Link to="/register">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/contact">Talk to an Advisor</Link>
-            </Button>
-          </div>
         </div>
       </section>
     </PublicLayout>

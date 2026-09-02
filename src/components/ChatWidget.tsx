@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   MessageCircle, X, Send, ShieldCheck, UserCircle,
-  Paperclip, FileText, Check, CheckCheck, Loader2, ChevronUp, Circle
+  Paperclip, FileText, Check, CheckCheck, Loader2, ChevronUp, Circle,
+  Maximize2, Minimize2, Sparkles, HelpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 function formatTime(d: string) {
   return new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
 function formatDate(d: string) {
   const date = new Date(d);
   const today = new Date();
@@ -35,39 +37,46 @@ function formatDate(d: string) {
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  open: { label: "Open", color: "bg-emerald-500" },
-  pending: { label: "Pending", color: "bg-amber-500" },
-  resolved: { label: "Resolved", color: "bg-sky-500" },
-  closed: { label: "Closed", color: "bg-zinc-400" },
+  open: { label: "Active", color: "bg-emerald-500" },
+  pending: { label: "Awaiting Reply", color: "bg-amber-500" },
+  resolved: { label: "Resolved", color: "bg-blue-500" },
+  closed: { label: "Closed", color: "bg-muted-foreground" },
 };
 
 function Attachment({ url, type, sender }: { url: string; type: string; sender: string }) {
   const isUser = sender === "user";
   if (type === "image") {
     return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-1.5">
-        <img src={url} alt="Attachment" className="rounded-lg object-cover max-w-[200px] max-h-[140px] border border-white/10" />
+      <a href={url} target="_blank" rel="noopener noreferrer" className="block mt-1.5 overflow-hidden rounded-lg border border-border/40">
+        <img src={url} alt="Attachment" className="rounded-lg object-cover max-w-[220px] max-h-[150px] transition-transform hover:scale-105" />
       </a>
     );
   }
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer"
-      className={`flex items-center gap-2 mt-1.5 px-3 py-2 rounded-lg text-xs transition-colors ${isUser ? "bg-white/10 hover:bg-white/20" : "bg-background/50 hover:bg-background/80"}`}>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex items-center gap-2 mt-1.5 px-3 py-2 rounded-lg text-xs transition-colors ${
+        isUser ? "bg-white/10 hover:bg-white/20" : "bg-card hover:bg-muted"
+      }`}
+    >
       <FileText className="h-4 w-4 shrink-0" />
-      <span className="truncate">View attachment</span>
+      <span className="truncate font-medium">View Attachment</span>
     </a>
   );
 }
 
 function DeliveryStatus({ msg }: { msg: any }) {
   if (msg.sender_type !== "user") return null;
-  if (msg.is_read) return <CheckCheck className="h-3 w-3 text-sky-400" />;
-  if (msg.is_delivered) return <CheckCheck className="h-3 w-3 text-muted-foreground/40" />;
-  return <Check className="h-3 w-3 text-muted-foreground/40" />;
+  if (msg.is_read) return <CheckCheck className="h-3 w-3 text-primary" />;
+  if (msg.is_delivered) return <CheckCheck className="h-3 w-3 text-muted-foreground/60" />;
+  return <Check className="h-3 w-3 text-muted-foreground/60" />;
 }
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [message, setMessage] = useState("");
   const [page, setPage] = useState(0);
   const [allMsgs, setAllMsgs] = useState<any[]>([]);
@@ -76,7 +85,7 @@ export function ChatWidget() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [isBottom, setIsBottom] = useState(true);
   const typingTimeout = useRef<any>(null);
-  const [showFaqs, setShowFaqs] = useState(true); // new
+  const [showFaqs, setShowFaqs] = useState(true);
 
   const { user } = useAuth();
   const { data: conversation, refetch: refetchConv } = useUserConversation();
@@ -145,7 +154,6 @@ export function ChatWidget() {
       })
       .subscribe();
 
-    // Also listen for conversation status changes
     const convChannel = supabase
       .channel(`conv_user_${convId}`)
       .on("postgres_changes", {
@@ -175,7 +183,6 @@ export function ChatWidget() {
     setShowFaqs(false);
     incUsage.mutate(faq.id);
     
-    // Instantly send user question
     await supabase.from("chat_messages").insert({
       conversation_id: convId,
       sender_id: user.id,
@@ -183,7 +190,6 @@ export function ChatWidget() {
       message: faq.question,
     });
 
-    // Update conversation timestamp so it appears at top of admin list
     await supabase.from("conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", convId);
@@ -201,7 +207,7 @@ export function ChatWidget() {
         });
         setAdminTyping(false);
         setIsBottom(true);
-      }, 1000);
+      }, 900);
     }
   };
 
@@ -227,7 +233,6 @@ export function ChatWidget() {
   const unread = allMsgs.filter(m => m.sender_type === "admin" && !m.is_read).length;
   const status = STATUS_MAP[conversation?.status || "open"];
 
-  // Group by date
   const dateGroups: [string, any[]][] = [];
   const gm: Record<string, any[]> = {};
   allMsgs.forEach(m => {
@@ -239,75 +244,113 @@ export function ChatWidget() {
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end">
       {isOpen && (
-        <div className="bg-card w-[calc(100vw-2rem)] sm:w-[400px] h-[78vh] sm:h-[540px] mb-3 rounded-2xl shadow-2xl border flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
-          {/* ─── Header ─── */}
-          <div className="bg-primary px-4 py-3 text-primary-foreground flex justify-between items-center shrink-0">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm">Live Support</h3>
-                {status && (
-                  <Badge className={`text-[9px] px-1.5 py-0 h-4 ${status.color} text-white border-0`}>
-                    {status.label}
-                  </Badge>
-                )}
+        <div
+          className={`bg-card shadow-elevation-xl flex flex-col overflow-hidden transition-all duration-300 z-[60] ${
+            isMaximized
+              ? "fixed inset-0 sm:inset-10 w-full sm:w-auto h-full sm:h-auto max-w-4xl mx-auto sm:rounded-2xl border-0 sm:border border-border"
+              : "fixed bottom-[76px] sm:bottom-[84px] right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[380px] h-[75vh] max-h-[600px] rounded-2xl border border-border animate-fade-in-up"
+          }`}
+        >
+          {/* Header */}
+          <div className="bg-primary px-4 py-3.5 text-primary-foreground flex justify-between items-center shrink-0 border-b border-primary/20">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="h-9 w-9 rounded-full bg-white/15 flex items-center justify-center backdrop-blur-sm">
+                  <ShieldCheck className="h-5 w-5 text-white" />
+                </div>
+                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-primary" />
               </div>
-              <p className="text-[11px] text-primary-foreground/60 mt-0.5">We typically reply in a few minutes</p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-heading font-semibold text-sm">AssetVault Support</h3>
+                  {status && (
+                    <Badge className={`text-[9px] px-1.5 py-0 h-4 ${status.color} text-white border-0 font-medium`}>
+                      {status.label}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-[11px] text-primary-foreground/75">Official Client Support Team</p>
+              </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-primary-foreground hover:bg-primary/80 h-8 w-8 shrink-0">
-              <X className="h-4 w-4" />
-            </Button>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMaximized(!isMaximized)}
+                className="text-primary-foreground hover:bg-white/15 h-8 w-8 shrink-0 hidden sm:inline-flex"
+                aria-label={isMaximized ? "Restore size" : "Maximize chat"}
+              >
+                {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="text-primary-foreground hover:bg-white/15 h-8 w-8 shrink-0"
+                aria-label="Close chat"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* ─── Messages ─── */}
-          <div ref={scrollRef} onScroll={onScroll} className="flex-1 px-3 py-2 sm:px-4 sm:py-3 overflow-y-auto">
+          {/* Messages Feed */}
+          <div ref={scrollRef} onScroll={onScroll} className="flex-1 px-4 py-3 overflow-y-auto space-y-3 bg-background/50">
             {msgData?.hasMore && (
-              <div className="flex justify-center mb-3">
+              <div className="flex justify-center mb-2">
                 <Button variant="ghost" size="sm" onClick={() => setPage(p => p + 1)} className="text-xs text-muted-foreground h-7 gap-1">
-                  <ChevronUp className="h-3 w-3" /> Load older messages
+                  <ChevronUp className="h-3 w-3" /> Load previous messages
                 </Button>
               </div>
             )}
 
             {allMsgs.length === 0 && (
-              <div className="flex justify-start gap-2 mb-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0 mt-0.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              <div className="flex flex-col gap-3 py-2 animate-fade-in">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="bg-card border border-border/70 p-3.5 rounded-2xl rounded-tl-sm text-sm text-foreground shadow-sm">
+                      <p className="font-semibold text-foreground mb-1">Hello and welcome to AssetVault.</p>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        Our verified client team is ready to assist you with accounts, deposits, copy trading, or platform questions.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-0.5">Admin</span>
-                  <div className="bg-muted p-3 rounded-2xl rounded-tl-sm text-sm mb-2">Hi there! 👋 How can we help you today?</div>
-                  
-                  {/* FAQs Quick Responses */}
-                  {showFaqs && faqs.length > 0 && (
-                    <div className="flex flex-col gap-1.5 mt-2 max-w-[85%] animate-in fade-in-50 duration-500">
-                      <p className="text-[10px] text-muted-foreground ml-1 uppercase tracking-wider font-semibold">Suggested Topics</p>
-                      {faqs.map((faq) => (
+
+                {/* Suggested Topics */}
+                {showFaqs && faqs.length > 0 && (
+                  <div className="pl-9 space-y-2">
+                    <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1">
+                      <HelpCircle className="h-3 w-3" /> Quick Inquiries
+                    </p>
+                    <div className="space-y-1.5">
+                      {faqs.slice(0, 4).map((faq) => (
                         <button
                           key={faq.id}
                           onClick={() => handleFaqClick(faq)}
-                          className="bg-primary/5 hover:bg-primary/10 border border-primary/20 text-primary text-xs text-left px-3 py-2 rounded-xl transition-colors"
+                          className="w-full text-left bg-muted/60 hover:bg-primary/10 hover:border-primary/30 border border-border/60 text-xs px-3 py-2 rounded-lg transition-colors font-medium text-foreground"
                         >
                           {faq.question}
                         </button>
                       ))}
-                      <button
-                        onClick={() => setShowFaqs(false)}
-                        className="bg-muted/50 hover:bg-muted border border-border text-xs text-left px-3 py-2 rounded-xl transition-colors text-muted-foreground mt-1"
-                      >
-                        Others / Skip
-                      </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
             {dateGroups.map(([dk, msgs]) => (
-              <div key={dk}>
+              <div key={dk} className="space-y-3">
                 <div className="flex items-center justify-center my-3">
-                  <div className="h-px bg-border flex-1" />
-                  <span className="text-[9px] text-muted-foreground/60 px-2 font-medium uppercase tracking-wider">{formatDate(msgs[0].created_at)}</span>
-                  <div className="h-px bg-border flex-1" />
+                  <div className="h-px bg-border/60 flex-1" />
+                  <span className="text-[10px] text-muted-foreground px-2 font-medium uppercase tracking-wider">
+                    {formatDate(msgs[0].created_at)}
+                  </span>
+                  <div className="h-px bg-border/60 flex-1" />
                 </div>
                 <div className="space-y-2.5">
                   {msgs.map((msg: any) => {
@@ -315,33 +358,33 @@ export function ChatWidget() {
                     return (
                       <div key={msg.id} className={`flex w-full gap-2 ${isSender ? "justify-end" : "justify-start"}`}>
                         {!isSender && (
-                          <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0 mt-0.5">
-                            <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                           </div>
                         )}
-                        <div className={`max-w-[80%] flex flex-col ${isSender ? "items-end" : "items-start"}`}>
-                          <div className={`flex items-center gap-1.5 mb-1 ${isSender ? "flex-row-reverse" : "flex-row"}`}>
-                            <span className="text-[9px] text-muted-foreground/50">{formatTime(msg.created_at)}</span>
-                          </div>
-                          <div className={`px-3 py-2 text-[13px] leading-relaxed ${
+                        <div className={`max-w-[82%] flex flex-col ${isSender ? "items-end" : "items-start"}`}>
+                          <div className={`px-3.5 py-2.5 text-xs leading-relaxed shadow-sm ${
                             isSender
                               ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm"
-                              : "bg-muted text-foreground rounded-2xl rounded-tl-sm"
+                              : "bg-card border border-border text-foreground rounded-2xl rounded-tl-sm"
                           }`}>
                             {msg.attachment_url ? (
                               <>
                                 {msg.message && <p className="mb-1">{msg.message}</p>}
                                 <Attachment url={msg.attachment_url} type={msg.attachment_type || "file"} sender={msg.sender_type} />
                               </>
-                            ) : msg.message}
+                            ) : (
+                              msg.message
+                            )}
                           </div>
-                          {isSender && (
-                            <div className="mt-0.5"><DeliveryStatus msg={msg} /></div>
-                          )}
+                          <div className={`flex items-center gap-1 mt-1 text-[10px] text-muted-foreground ${isSender ? "justify-end" : "justify-start"}`}>
+                            <span>{formatTime(msg.created_at)}</span>
+                            {isSender && <DeliveryStatus msg={msg} />}
+                          </div>
                         </div>
                         {isSender && (
-                          <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-0.5">
-                            <UserCircle className="h-3 w-3 text-primary" />
+                          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5 text-xs font-semibold text-primary">
+                            <UserCircle className="h-4 w-4" />
                           </div>
                         )}
                       </div>
@@ -354,46 +397,72 @@ export function ChatWidget() {
             {/* Typing indicator */}
             {adminTyping && (
               <div className="flex items-center gap-2 mt-2">
-                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                 </div>
-                <div className="bg-muted px-3 py-2 rounded-2xl rounded-tl-sm">
-                  <div className="flex gap-1">
-                    <Circle className="h-1.5 w-1.5 fill-muted-foreground/50 text-transparent animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <Circle className="h-1.5 w-1.5 fill-muted-foreground/50 text-transparent animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <Circle className="h-1.5 w-1.5 fill-muted-foreground/50 text-transparent animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="bg-card border border-border px-3 py-2 rounded-2xl rounded-tl-sm">
+                  <div className="flex gap-1 items-center">
+                    <Circle className="h-1.5 w-1.5 fill-muted-foreground text-transparent animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <Circle className="h-1.5 w-1.5 fill-muted-foreground text-transparent animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <Circle className="h-1.5 w-1.5 fill-muted-foreground text-transparent animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* ─── Input ─── */}
-          <div className="p-2.5 border-t bg-background flex items-center gap-1.5 shrink-0">
-            <input ref={fileRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt,.xlsx,.csv" className="hidden" onChange={handleFile} />
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground" onClick={() => fileRef.current?.click()} disabled={uploadFile.isPending}>
+          {/* Input Bar */}
+          <div className="p-3 border-t bg-card flex items-center gap-2 shrink-0">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf,.doc,.docx,.txt,.xlsx,.csv"
+              className="hidden"
+              onChange={handleFile}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploadFile.isPending}
+              aria-label="Attach file"
+            >
               {uploadFile.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
             </Button>
             <Input
-              placeholder={showFaqs && allMsgs.length === 0 ? "Select an option or type a message..." : "Write a message..."}
+              placeholder={showFaqs && allMsgs.length === 0 ? "Select a topic or type your message..." : "Type your message here..."}
               value={message}
               onChange={e => handleInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
               onClick={() => setShowFaqs(false)}
-              className="bg-muted border-none text-sm h-9"
+              className="bg-muted/50 border border-border text-xs h-9 focus-visible:ring-primary"
             />
-            <Button size="icon" onClick={handleSend} disabled={!message.trim() || sendMsg.isPending} className="shrink-0 h-8 w-8">
-              <Send className="h-3.5 w-3.5" />
+            <Button
+              size="icon"
+              onClick={handleSend}
+              disabled={!message.trim() || sendMsg.isPending}
+              className="shrink-0 h-9 w-9 shadow-sm"
+              aria-label="Send message"
+            >
+              <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* ─── FAB ─── */}
-      <Button onClick={() => setIsOpen(!isOpen)} size="icon" className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl relative">
-        {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />}
+      {/* Floating Action Button */}
+      <Button
+        onClick={() => setIsOpen(!isOpen)}
+        size="icon"
+        className="h-14 w-14 rounded-full shadow-elevation-xl relative transition-transform hover:scale-105 active:scale-95 bg-primary text-primary-foreground"
+        aria-label={isOpen ? "Close live support" : "Open live support"}
+      >
+        {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
         {!isOpen && unread > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">{unread}</span>
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
+            {unread}
+          </span>
         )}
       </Button>
     </div>

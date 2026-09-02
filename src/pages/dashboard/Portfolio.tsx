@@ -68,8 +68,8 @@ export default function Portfolio() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-heading">My Portfolio</h1>
-        <p className="text-muted-foreground text-sm mt-1">A detailed breakdown of your asset allocation and performance.</p>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Portfolio Breakdown</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">A detailed allocation and performance summary of your active investment positions.</p>
       </div>
 
       <div className="grid sm:grid-cols-3 gap-4">

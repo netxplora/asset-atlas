@@ -292,7 +292,7 @@ export const useCmsFaqs = (adminView = false) => {
     queryFn: async (): Promise<CmsFaq[]> => {
       let query = (supabase as any).from("cms_faqs").select("*").order("sort_order", { ascending: true });
       if (!adminView) {
-        query = query.eq("is_published", true);
+        query = query.eq("is_active", true);
       }
       const { data, error } = await query;
       if (error) throw error;
@@ -418,7 +418,7 @@ export const useCmsAnnouncements = (adminView = false) => {
     queryFn: async (): Promise<CmsAnnouncement[]> => {
       let query = (supabase as any).from("cms_announcements").select("*").order("created_at", { ascending: false });
       if (!adminView) {
-        query = query.eq("is_active", true);
+        query = query.eq("status", "active");
         // Could also filter by dates here if needed, but RLS or client-side filtering can handle it.
       }
       const { data, error } = await query;

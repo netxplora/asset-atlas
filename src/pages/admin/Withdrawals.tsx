@@ -80,7 +80,7 @@ export default function AdminWithdrawals() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Withdrawal Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Withdrawal Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{isLoading ? 'Loading...' : `${withdrawals.length} total · ${withdrawals.filter((w: any) => w.status === "pending").length} pending`}</p>
         </div>
         <div className="flex gap-3 text-sm">

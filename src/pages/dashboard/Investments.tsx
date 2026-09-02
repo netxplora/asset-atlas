@@ -58,14 +58,14 @@ export default function Investments() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-heading">Investments</h1>
-        <p className="text-muted-foreground text-sm mt-1">Manage your active plans and discover new investment opportunities.</p>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Investments</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Manage active investment plans and allocate funds across available strategies.</p>
       </div>
       
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full sm:w-[400px] grid-cols-2">
-          <TabsTrigger value="active">Active Investments</TabsTrigger>
-          <TabsTrigger value="available">Available Plans</TabsTrigger>
+          <TabsTrigger value="active" className="font-semibold">Active Investments</TabsTrigger>
+          <TabsTrigger value="available" className="font-semibold">Available Plans</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4 mt-6">

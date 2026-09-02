@@ -138,7 +138,7 @@ export default function DashboardCopyTrading() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-heading">Copy Trading</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Copy Trading</h1>
         <p className="text-muted-foreground text-sm mt-1 max-w-3xl">
           Automatically replicate the strategies of professional traders. Browse verified experts, allocate your capital, and let the platform mirror their positions in real time.
         </p>

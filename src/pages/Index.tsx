@@ -12,6 +12,7 @@ import {
   Globe, Wallet, Copy, ChevronRight, Smartphone, CheckCircle2,
   Lock, Zap, PieChart, Clock, Award, Headphones,
   ShieldCheck, UserCheck, Banknote, Eye, FileCheck, HelpCircle,
+  ArrowUpRight, RefreshCw, Layers
 } from "lucide-react";
 import heroMain from "@/assets/hero-main.jpg";
 import heroSlide2 from "@/assets/hero-slide-2.png";
@@ -21,89 +22,161 @@ import heroCrypto from "@/assets/hero-crypto.jpg";
 import heroCommodities from "@/assets/hero-commodities.jpg";
 import appMockup from "@/assets/app-mockup.png";
 import { useAppSettings } from "@/hooks/useCmsData";
+import { SEOHead } from "@/components/SEOHead";
 
 const heroImages = [heroMain, heroSlide2, heroSlide3];
 
 const cryptoTicker = [
   { pair: "BTC/USD", price: "64,230.50", change: "+2.4%" },
   { pair: "ETH/USD", price: "3,450.20", change: "+1.8%" },
+  { pair: "EUR/USD", price: "1.0845", change: "+0.3%" },
+  { pair: "XAU/USD (Gold)", price: "2,385.60", change: "+0.9%" },
   { pair: "SOL/USD", price: "145.80", change: "+5.2%" },
-  { pair: "XRP/USD", price: "0.58", change: "-0.5%" },
+  { pair: "GBP/USD", price: "1.2910", change: "-0.2%" },
+  { pair: "BRENT OIL", price: "84.20", change: "+1.1%" },
   { pair: "BNB/USD", price: "590.30", change: "+1.2%" },
-  { pair: "ADA/USD", price: "0.45", change: "+0.8%" },
-  { pair: "DOGE/USD", price: "0.15", change: "+4.1%" },
-  { pair: "AVAX/USD", price: "35.20", change: "-1.2%" },
-];
-
-const stats = [
-  { label: "Active Investors", value: "25,000+", icon: Users },
-  { label: "Assets Under Management", value: "$180M+", icon: Wallet },
-  { label: "Average ROI", value: "18.5%", icon: TrendingUp },
-  { label: "Countries Supported", value: "120+", icon: Globe },
 ];
 
 const trustBar = [
-  { label: "SSL Secured", icon: Lock },
-  { label: "Encrypted Transactions", icon: ShieldCheck },
-  { label: "Verified Accounts", icon: UserCheck },
-  { label: "24/7 Support", icon: Headphones },
-  { label: "25,000+ Global Investors", icon: Globe },
+  { label: "256-Bit SSL Encryption", icon: Lock },
+  { label: "Segregated Accounts", icon: Banknote },
+  { label: "Verified KYC Accounts", icon: UserCheck },
+  { label: "Direct Crypto Deposits", icon: Wallet },
+  { label: "Dedicated Client Support", icon: Headphones },
 ];
 
 const categories = [
-  { title: "Forex", desc: "Trade major, minor, and exotic currency pairs with competitive spreads and expert-managed plans.", image: heroForex },
-  { title: "Crypto", desc: "Invest in Bitcoin, Ethereum, and top altcoins with institutional-grade security and diversified strategies.", image: heroCrypto },
-  { title: "Commodities", desc: "Diversify with Gold, Silver, Oil and other physical assets for long-term wealth preservation.", image: heroCommodities },
+  {
+    title: "Forex Trading",
+    badge: "High Liquidity",
+    desc: "Trade major, minor, and emerging currency pairs with competitive spreads and disciplined risk management.",
+    image: heroForex,
+    metrics: "24/5 Markets • Low Slippage",
+    link: "/plans"
+  },
+  {
+    title: "Cryptocurrency",
+    badge: "Digital Assets",
+    desc: "Gain managed exposure to Bitcoin, Ethereum, and market-leading digital assets secured with cold-storage protocols.",
+    image: heroCrypto,
+    metrics: "24/7 Markets • Cold Storage",
+    link: "/plans"
+  },
+  {
+    title: "Commodities",
+    badge: "Tangible Assets",
+    desc: "Diversify your portfolio with Gold, Silver, Crude Oil, and core physical commodities to protect against market volatility.",
+    image: heroCommodities,
+    metrics: "Inflation Hedge • Physical Assets",
+    link: "/plans"
+  },
 ];
 
 const howItWorks = [
-  { step: "1", title: "Create Account", desc: "Sign up in minutes with a simple registration process.", icon: Users },
-  { step: "2", title: "Verify Identity", desc: "Complete KYC verification with a valid government-issued ID.", icon: UserCheck },
-  { step: "3", title: "Fund Account", desc: "Deposit funds via crypto, bank transfer, or supported methods.", icon: Banknote },
-  { step: "4", title: "Choose Strategy", desc: "Select an investment plan or copy a professional trader.", icon: BarChart3 },
-  { step: "5", title: "Track Portfolio", desc: "Monitor your portfolio performance with real-time analytics.", icon: Eye },
-  { step: "6", title: "Withdraw Earnings", desc: "Request withdrawals anytime — processed within 1-3 business days.", icon: Wallet },
+  {
+    step: "01",
+    title: "Create Account",
+    desc: "Complete a simple 2-minute registration with your email and secure credentials.",
+    icon: Users
+  },
+  {
+    step: "02",
+    title: "Verify Identity",
+    desc: "Submit a valid government ID for fast account verification and fraud protection.",
+    icon: UserCheck
+  },
+  {
+    step: "03",
+    title: "Fund Account",
+    desc: "Transfer funds directly through supported digital asset networks with instant receipt tracking.",
+    icon: Banknote
+  },
+  {
+    step: "04",
+    title: "Select Strategy",
+    desc: "Choose an investment plan that aligns with your capital objectives or copy a professional trader.",
+    icon: BarChart3
+  },
+  {
+    step: "05",
+    title: "Track Portfolio",
+    desc: "Monitor yields, active positions, and performance reports in real time from your dashboard.",
+    icon: Eye
+  },
+  {
+    step: "06",
+    title: "Withdraw Earnings",
+    desc: "Submit withdrawal requests directly to your destination wallet with transparent status tracking.",
+    icon: Wallet
+  },
 ];
 
 const features = [
-  { title: "Copy Trading", desc: "Mirror professional traders automatically and earn consistent returns without trading experience.", icon: Copy },
-  { title: "Smart Portfolio", desc: "Portfolio management tools that optimize your asset allocation in real time.", icon: BarChart3 },
-  { title: "Bank-Grade Security", desc: "256-bit encryption, 2FA protection, and cold storage for digital assets.", icon: Shield },
-  { title: "24/7 Support", desc: "Round-the-clock customer assistance via live chat, email, and phone.", icon: Headphones },
-  { title: "Fast Withdrawals", desc: "Process withdrawals within 1-3 business days with multiple payment methods.", icon: Zap },
-  { title: "Real-time Analytics", desc: "Track your portfolio performance with detailed charts and ROI breakdowns.", icon: PieChart },
+  {
+    title: "Verified Copy Trading",
+    desc: "Mirror vetted traders with transparent track records. Set investment caps and auto-replicate trades seamlessly.",
+    icon: Copy,
+  },
+  {
+    title: "Structured Investment Plans",
+    desc: "Select fixed-term investment tiers across Forex, Crypto, and Commodities with clearly defined return schedules.",
+    icon: BarChart3,
+  },
+  {
+    title: "Segregated Client Funds",
+    desc: "Investor capital is held independently from platform operational balances to ensure complete asset safety.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Real-Time Portfolio Analytics",
+    desc: "Gain comprehensive insights into asset allocation, historical ROI, and portfolio distribution on all devices.",
+    icon: PieChart,
+  },
+  {
+    title: "Direct Network Deposits",
+    desc: "Fund your account quickly with direct crypto transfers backed by blockchain transaction hash verification.",
+    icon: Wallet,
+  },
+  {
+    title: "Dedicated 24/7 Support",
+    desc: "Access live chat and email assistance whenever you need guidance with your transactions or account.",
+    icon: Headphones,
+  },
 ];
 
-const confidenceItems = [
-  { icon: Lock, title: "Account Security", desc: "Your account is protected by 256-bit SSL encryption, optional two-factor authentication, and session monitoring. We detect and block unauthorized access attempts automatically." },
-  { icon: Banknote, title: "Fund Protection", desc: "Client funds are held in segregated accounts, separate from company operating funds. Your investment capital is protected and accounted for at all times." },
-  { icon: UserCheck, title: "Identity Verification", desc: "Our KYC process verifies every investor's identity to prevent fraud and protect the platform community. Verification typically completes within 24 hours." },
-  { icon: Zap, title: "Withdrawal Guarantees", desc: "Withdrawal requests are processed within 1-3 business days after approval. There are no hidden fees or lockup periods on your available balance." },
-  { icon: ShieldCheck, title: "Regulatory Compliance", desc: "AssetVault operates in compliance with international financial regulations and anti-money laundering (AML) standards." },
-  { icon: Headphones, title: "Dedicated Support", desc: "Our support team is available 24/7 via email, live chat, and phone to assist with any account-related questions or concerns." },
-];
-
-const testimonials = [
-  { name: "James W.", role: "Forex Investor", country: "United States", text: "AssetVault's copy trading feature helped me earn consistent returns without needing to trade myself. The platform is incredibly professional.", rating: 5, verified: true },
-  { name: "Sarah L.", role: "Crypto Investor", country: "United Kingdom", text: "The platform is incredibly intuitive. I've been investing in crypto plans for 6 months with great results. Customer support is outstanding.", rating: 5, verified: true },
-  { name: "Michael R.", role: "Commodities Investor", country: "Canada", text: "Professional platform with excellent ROI tracking. My gold investments have performed exceptionally well even during market volatility.", rating: 5, verified: true },
-  { name: "Emily T.", role: "Forex Investor", country: "Australia", text: "I switched from another platform and immediately noticed the difference. Clean interface, transparent fees, and reliable returns.", rating: 5, verified: true },
-  { name: "Daniel O.", role: "Crypto Investor", country: "Germany", text: "The withdrawal process is smooth and fast. I received my funds within 2 business days. Very trustworthy platform.", rating: 5, verified: true },
-  { name: "Priya K.", role: "Copy Trading", country: "India", text: "Copy trading made investing accessible for me. I follow two professional traders and have seen steady growth in my portfolio.", rating: 5, verified: true },
-  { name: "Robert M.", role: "Diversified Investor", country: "South Africa", text: "I invest across Forex, Crypto, and Commodities on AssetVault. The diversification tools and portfolio analytics are excellent.", rating: 5, verified: true },
-  { name: "Yuki H.", role: "Forex Investor", country: "Japan", text: "The account verification was quick and the deposit process is straightforward. I appreciate the transparency in fee structure.", rating: 5, verified: true },
+const tradersHighlight = [
+  { name: "Alex Chen", market: "Forex Specialist", winRate: "88%", roi: "+24.5%", followers: 1420, risk: "Low" },
+  { name: "Maria Santos", market: "Crypto Momentum", winRate: "84%", roi: "+31.2%", followers: 980, risk: "Medium" },
+  { name: "David Kim", market: "Commodities & Gold", winRate: "91%", roi: "+18.7%", followers: 2150, risk: "Low" },
+  { name: "Lisa Meyer", market: "Multi-Asset Scalper", winRate: "86%", roi: "+22.1%", followers: 1100, risk: "Medium" },
 ];
 
 const homepageFaqs = [
-  { q: "What is AssetVault?", a: "AssetVault is a digital asset brokerage platform that allows you to invest in Forex, Crypto, and Commodities through managed investment plans and copy trading. We connect you with professional traders and expertly managed portfolios." },
-  { q: "How much do I need to start investing?", a: "Minimum investments vary by plan. Forex starts at $100, Crypto at $250, and Commodities at $500 for Starter plans. Higher tiers offer better returns with larger minimum investments." },
-  { q: "Is my money safe on AssetVault?", a: "Yes. We use 256-bit encryption, optional 2FA, and cold storage for digital assets. Client funds are held in segregated accounts separate from company operations. We comply with international financial regulations." },
-  { q: "How do withdrawals work?", a: "You can withdraw your available balance at any time through your dashboard. KYC verification is required. Withdrawal requests are processed within 1-3 business days depending on the method." },
-  { q: "What is copy trading?", a: "Copy trading lets you automatically mirror the trades of professional traders on the platform. You select a trader, set your investment amount, and the system copies their trades proportionally. No trading experience is needed." },
-  { q: "How do I verify my account?", a: "After registration, go to your Profile settings and upload a valid government-issued ID along with proof of address. Verification is typically completed within 24 hours by our compliance team." },
+  {
+    q: "What is AssetVault and how does it work?",
+    a: "AssetVault is a digital asset brokerage and managed investment platform. Investors can deposit funds, select structured plans across Forex, Cryptocurrency, and Commodities, or mirror verified professional traders through automated copy trading."
+  },
+  {
+    q: "What is the minimum amount required to begin investing?",
+    a: "Minimum deposits begin at $100 for Forex starter plans, $250 for Cryptocurrency plans, and $500 for Commodities plans. Detailed minimums and durations for all tiers are available on our Investment Plans page."
+  },
+  {
+    q: "How are investor funds protected?",
+    a: "We maintain 256-bit SSL encryption, enforce strict identity verification (KYC), keep client capital in segregated accounts, and utilize cold storage custody for digital assets."
+  },
+  {
+    q: "How do deposits and withdrawals work?",
+    a: "Deposits are made directly via cryptocurrency networks (such as Bitcoin, Ethereum, USDT) with verifiable blockchain transaction hashes. Withdrawals can be requested from your user dashboard and are processed after standard security verification."
+  },
+  {
+    q: "Can I monitor my active investments on mobile?",
+    a: "Yes. AssetVault features a fully responsive, mobile-first investor dashboard accessible from any modern mobile browser or device."
+  },
+  {
+    q: "How does the Copy Trading system work?",
+    a: "Copy trading allows you to allocate capital to verified traders on the platform. When a selected trader executes a trade, your account mirrors that position proportionally based on your chosen allocation."
+  }
 ];
-
-import { SEOHead } from "@/components/SEOHead";
 
 export default function Index() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -111,377 +184,463 @@ export default function Index() {
   const { user } = useAuth();
   const investLink = user ? "/dashboard/investments" : "/register";
 
-  // Provide defaults
   const content = {
-    hero_title: homeData?.hero_title || "Your Gateway to",
-    hero_highlight: homeData?.hero_highlight || "Smart Investing",
-    hero_subtitle: homeData?.hero_subtitle || "Invest in Forex, Crypto, and Commodities with professional-grade tools, copy trading, and managed investment plans designed for maximum returns.",
+    hero_title: homeData?.hero_title || "Professional Digital Asset &",
+    hero_highlight: homeData?.hero_highlight || "Investment Management",
+    hero_subtitle: homeData?.hero_subtitle || "Access managed strategies across Forex, Cryptocurrency, and Commodities with transparent performance metrics, verified copy trading, and dedicated client security.",
     cta_title: homeData?.cta_title || "Ready to Start Building Your Investment Portfolio?",
-    cta_subtitle: homeData?.cta_subtitle || "Join thousands of investors already growing their wealth with AssetVault. Create your free account and start earning today."
+    cta_subtitle: homeData?.cta_subtitle || "Create your account today and gain immediate access to institutional-grade investment plans and verified copy traders."
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <PublicLayout>
-      <SEOHead path="/" />
-      {/* Hero */}
-      <section className="relative min-h-[600px] flex items-center overflow-hidden">
-        <div 
+      <SEOHead
+        title="AssetVault - Professional Digital Asset Brokerage"
+        description="Invest in Forex, Cryptocurrency, and Commodities through structured plans and verified copy trading with AssetVault."
+        path="/"
+      />
+
+      {/* ─── Hero Section ─── */}
+      <section className="relative min-h-[580px] lg:min-h-[640px] flex items-center overflow-hidden bg-slate-950 text-white">
+        {/* Background Slideshow */}
+        <div
           className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
           style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
         >
           {heroImages.map((img, index) => (
             <div key={index} className="relative min-w-full h-full">
-              <img 
-                src={img} 
-                alt={`Digital investment platform view ${index + 1}`} 
-                className="w-full h-full object-cover" 
+              <img
+                src={img}
+                alt={`AssetVault investment platform overview ${index + 1}`}
+                className={`w-full h-full object-cover object-center hero-kenburns`}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/35" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent" />
             </div>
           ))}
         </div>
-        
-        {/* Navigation Dots */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {heroImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentImageIndex 
-                  ? "bg-accent scale-110" 
-                  : "bg-white/40 hover:bg-white/60"
+              className={`h-2 rounded-full transition-all ${
+                index === currentImageIndex
+                  ? "w-8 bg-primary"
+                  : "w-2 bg-white/40 hover:bg-white/70"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
 
-        <div className="container relative z-10 py-20 lg:py-28">
-          <div className="max-w-2xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 text-sm bg-white/10 text-white backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-              <Star className="h-4 w-4 text-accent" /> Trusted by 25,000+ investors worldwide
+        {/* Hero Content */}
+        <div className="container relative z-10 py-16 lg:py-24">
+          <div className="max-w-3xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/20 text-xs font-medium bg-white/10 text-white backdrop-blur-md animate-fade-in" style={{animationDelay:'0ms'}}>
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <span>Verified Financial Platform & Direct Asset Custody</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white font-heading animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-              {content.hero_title} <span className="text-gradient-gold">{content.hero_highlight}</span>
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-white leading-tight animate-fade-in-up" style={{animationDelay:'80ms'}}>
+              {content.hero_title}{" "}
+              <span className="text-primary">{content.hero_highlight}</span>
             </h1>
-            <p className="text-lg text-white/80 max-w-xl animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+
+            <p className="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed animate-fade-in-up" style={{animationDelay:'180ms'}}>
               {content.hero_subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-              <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
-                <Link to={investLink}>Start Investing <ArrowRight className="ml-2 h-4 w-4" /></Link>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 animate-fade-in-up" style={{animationDelay:'280ms'}}>
+              <Button size="lg" className="font-semibold shadow-md glow-primary" asChild>
+                <Link to={investLink}>
+                  Start Investing <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
-                <Link to="/plans">View Plans</Link>
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md" asChild>
+                <Link to="/plans">Explore Investment Plans</Link>
               </Button>
+            </div>
+
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/15 max-w-xl animate-fade-in-up" style={{animationDelay:'380ms'}}>
+              <div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-white">3 Asset Classes</div>
+                <div className="text-xs text-slate-400">Forex, Crypto, Commodities</div>
+              </div>
+              <div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-emerald-400">256-Bit SSL</div>
+                <div className="text-xs text-slate-400">Encrypted Infrastructure</div>
+              </div>
+              <div>
+                <div className="text-xl sm:text-2xl font-heading font-bold text-white">Direct Transfer</div>
+                <div className="text-xs text-slate-400">On-Chain Verification</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust Bar */}
-      <section className="border-b bg-background">
+      {/* ─── Trust Indicators Bar ─── */}
+      <section className="border-b bg-card">
         <div className="container py-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
             {trustBar.map((item) => (
-              <div key={item.label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                <item.icon className="h-4 w-4 text-success shrink-0" />
-                <span className="font-medium">{item.label}</span>
+              <div key={item.label} className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
+                <item.icon className="h-4 w-4 text-primary shrink-0" />
+                <span>{item.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Market Ticker */}
-      <div className="bg-muted border-b overflow-hidden relative py-3 group">
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted to-transparent z-10"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted to-transparent z-10"></div>
-        <div className="flex animate-marquee group-hover:[animation-play-state:paused] whitespace-nowrap">
-          {[...cryptoTicker, ...cryptoTicker, ...cryptoTicker].map((item, i) => (
-            <div key={i} className="inline-flex items-center gap-2 mx-6 text-sm">
-              <span className="font-bold">{item.pair}</span>
+      {/* ─── Live Market Ticker ─── */}
+      <div className="bg-muted/60 border-b overflow-hidden relative py-2.5">
+        <div className="flex animate-marquee hover:[animation-play-state:paused] whitespace-nowrap">
+          {[...cryptoTicker, ...cryptoTicker].map((item, i) => (
+            <div key={i} className="inline-flex items-center gap-2 mx-6 text-xs sm:text-sm">
+              <span className="font-semibold text-foreground">{item.pair}</span>
               <span className="text-muted-foreground">${item.price}</span>
-              <span className={item.change.startsWith('+') ? "text-success font-medium" : "text-destructive font-medium"}>
+              <span className={`font-semibold ${item.change.startsWith('+') ? "text-success" : "text-destructive"}`}>
                 {item.change}
               </span>
             </div>
           ))}
         </div>
-        <div className="text-center w-full absolute -bottom-5 left-0 opacity-0 group-hover:opacity-100 transition-opacity bg-muted/90 backdrop-blur-sm py-1 z-20 text-[10px] text-muted-foreground">
-          Disclaimer: Prices shown are for illustrative purposes only.
-        </div>
       </div>
 
-      {/* Stats */}
-      <section className="py-12 border-b">
-        <div className="container grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((s, i) => (
-            <div key={s.label} className="text-center space-y-1 animate-scale-in" style={{ animationDelay: `${i * 100}ms` }}>
-              <s.icon className="h-6 w-6 mx-auto text-primary mb-2" />
-              <div className="text-2xl font-bold animate-count-up" style={{ animationDelay: `${(i * 100) + 300}ms` }}>{s.value}</div>
-              <div className="text-sm text-muted-foreground">{s.label}</div>
+      {/* ─── Investment Categories ─── */}
+      <section className="py-16 lg:py-20">
+        <div className="container space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+              Asset Diversity
             </div>
-          ))}
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+              Investment Categories
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Select from three distinct asset classes tailored for consistent capital growth and portfolio balance.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 stagger-children">
+            {categories.map((c) => (
+              <Card key={c.title} className="reveal card-hover group overflow-hidden border border-border shadow-elevation-sm flex flex-col">
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={c.image}
+                    alt={`${c.title} investment strategy`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-3 right-3">
+                    <span className="bg-background/90 backdrop-blur-md text-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full border shadow-sm">
+                      {c.badge}
+                    </span>
+                  </div>
+                </div>
+                <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-heading font-bold text-foreground">{c.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+                  </div>
+                  <div className="pt-4 border-t flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">{c.metrics}</span>
+                    <Button variant="outline" size="sm" asChild className="font-semibold">
+                      <Link to={c.link}>
+                        View Plans <ChevronRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Investment Categories */}
+      {/* ─── How AssetVault Works ─── */}
+      <section className="py-16 lg:py-24 mesh-bg">
+        <div className="container space-y-12 relative z-10">
+          <div className="text-center max-w-2xl mx-auto space-y-3 reveal">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+              Platform Workflow
+            </div>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+              How AssetVault Works
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              A transparent, streamlined investment process from initial onboarding to regular withdrawal of earnings.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 stagger-children">
+            {howItWorks.map((item, i) => (
+              <Card key={item.step} className="reveal glass-card card-hover transition-colors overflow-hidden relative group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full transition-transform group-hover:scale-110" />
+                <CardContent className="p-6 space-y-4 relative z-10">
+                  <div className="flex items-center justify-between">
+                    <div className="icon-badge-blue">
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <span className="font-heading font-extrabold text-2xl text-muted-foreground/40">
+                      {item.step}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <h3 className="font-heading font-bold text-lg text-foreground">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Copy Trading Showcase ─── */}
+      <section className="py-16 lg:py-20">
+        <div className="container space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+                Automated Allocation
+              </div>
+              <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+                Verified Copy Trading
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Follow experienced market specialists and automatically mirror their positions with proportional capital allocation.
+              </p>
+            </div>
+            <Button asChild className="font-semibold shrink-0">
+              <Link to="/copy-trading">
+                Browse All Traders <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
+            {tradersHighlight.map((trader) => (
+              <Card key={trader.name} className="reveal glass-card card-hover shine">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">{trader.market}</span>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      {trader.risk} Risk
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-base text-foreground">{trader.name}</h3>
+                    <div className="text-xs text-muted-foreground mt-0.5">{trader.followers.toLocaleString()} Copiers</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t text-center">
+                    <div className="bg-muted/40 p-2 rounded-lg">
+                      <div className="text-[11px] text-muted-foreground font-medium">Win Rate</div>
+                      <div className="text-sm font-bold text-foreground">{trader.winRate}</div>
+                    </div>
+                    <div className="bg-emerald-500/10 p-2 rounded-lg">
+                      <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Yield</div>
+                      <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{trader.roi}</div>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" asChild className="w-full font-semibold">
+                    <Link to="/copy-trading">Copy Strategy</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Why Choose AssetVault ─── */}
+      <section className="py-16 lg:py-20 bg-muted/30 border-y">
+        <div className="container space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+              Platform Features
+            </div>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+              Why Investors Choose AssetVault
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Engineered to deliver stability, security, and actionable portfolio control for discerning digital investors.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 stagger-children">
+            {features.map((f, i) => (
+              <Card key={f.title} className="reveal glass-card card-hover group">
+                <CardContent className="p-6 space-y-3">
+                  <div className={`icon-badge ${['icon-badge-blue', 'icon-badge-green', 'icon-badge-amber', 'icon-badge-purple', 'icon-badge-teal', 'icon-badge-red'][i % 6]}`}>
+                    <f.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-foreground">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Trust & Security Center Spotlight ─── */}
       <section className="py-16 lg:py-20">
         <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Investment Categories</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Choose from our diverse range of investment categories tailored to your financial goals and risk appetite.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {categories.map((c) => (
-              <Card key={c.title} className="relative overflow-hidden hover:shadow-lg transition-shadow group">
-                <div className="h-48 overflow-hidden">
-                  <img src={c.image} alt={`${c.title} investments`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" width={640} height={192} />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 flex flex-col justify-end p-6">
-                  <h3 className="text-white font-semibold text-xl">{c.title}</h3>
-                  <p className="text-white/80 text-sm mb-4">{c.desc}</p>
-                  <Button variant="outline" size="sm" className="w-fit" asChild>
-                    <Link to="/plans">Explore Plans <ChevronRight className="ml-1 h-3 w-3" /></Link>
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works — 6 Steps */}
-      <section className="py-16 bg-muted/30">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">How AssetVault Works</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Get started in six simple steps — from account creation to earning returns on your investments.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {howItWorks.map((item, i) => (
-              <div key={item.step} className="relative text-center space-y-3 animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="w-14 h-14 rounded-full bg-gradient-primary flex items-center justify-center mx-auto text-primary-foreground font-bold text-xl">{item.step}</div>
-                <h3 className="font-semibold text-lg">{item.title}</h3>
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto">{item.desc}</p>
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+                Security Infrastructure
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+                Institutional Security & Client Protection
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                We implement comprehensive safeguards to ensure account integrity, prevent unauthorized transactions, and maintain transparent custody standards.
+              </p>
 
-      {/* Copy Trading */}
-      <section className="py-16">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-5">
-              <h2 className="text-3xl font-bold">Copy Trading Made Simple</h2>
-              <p className="text-muted-foreground">Follow top-performing traders and automatically mirror their strategies. No experience needed — let the experts trade for you while you earn proportional returns.</p>
-              <ul className="space-y-3">
-                {["Browse verified professional traders with proven track records", "Filter by asset class, risk level, and performance metrics", "Set your investment amount and auto-copy trades instantly", "Real-time ROI tracking with detailed performance analytics"].map((t) => (
-                  <li key={t} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" /> {t}
-                  </li>
-                ))}
-              </ul>
-              <Button asChild>
-                <Link to="/copy-trading">Explore Traders <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { name: "Alex Chen", asset: "Forex", roi: "+24.5%", rank: "Elite" },
-                { name: "Maria S.", asset: "Crypto", roi: "+31.2%", rank: "Gold" },
-                { name: "David K.", asset: "Commodities", roi: "+18.7%", rank: "Silver" },
-                { name: "Lisa M.", asset: "Forex", roi: "+22.1%", rank: "Elite" },
-              ].map((t) => (
-                <Card key={t.name} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-muted-foreground">{t.asset}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-medium">{t.rank}</span>
-                    </div>
-                    <div className="font-semibold text-sm">{t.name}</div>
-                    <div className="text-lg font-bold text-success">{t.roi}</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose AssetVault */}
-      <section className="py-16 lg:py-20 bg-muted/30">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Why Investors Choose AssetVault</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Built for serious investors who demand performance, security, and simplicity in their investment journey.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f) => (
-              <Card key={f.title} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6 space-y-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <f.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground">{f.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Investor Confidence */}
-      <section className="py-16">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Your Security Is Our Priority</h2>
-              <p className="text-muted-foreground mb-8">We employ industry-leading security measures to protect your funds and personal data at every level. Here's how we keep your account and investments safe.</p>
-              <div className="space-y-5">
-                {confidenceItems.slice(0, 3).map((item) => (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </div>
+              <div className="space-y-4">
+                {[
+                  { title: "Segregated Balances", desc: "Client funds are stored separately from operational capital." },
+                  { title: "Cold Storage Protocols", desc: "Digital assets are secured using offline multi-signature custody." },
+                  { title: "Identity Verification (KYC)", desc: "Mandatory compliance checks safeguard against platform abuse." },
+                  { title: "Encrypted Data Transmission", desc: "All network traffic is encrypted via high-grade 256-bit SSL protocols." },
+                ].map((item) => (
+                  <div key={item.title} className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
                     <div>
-                      <h4 className="font-semibold text-sm">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <h4 className="font-semibold text-sm text-foreground">{item.title}</h4>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="pt-2">
+                <Button variant="outline" asChild className="font-semibold">
+                  <Link to="/security">
+                    Learn More in Security Center <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
-            <div>
-              <Card className="bg-gradient-hero text-primary-foreground border-0 mb-6">
-                <CardContent className="p-8 space-y-6">
-                  <Shield className="h-16 w-16 text-accent" />
-                  <h3 className="text-2xl font-bold">Bank-Grade Protection</h3>
-                  <p className="text-primary-foreground/80">Your funds are protected by multi-layer security protocols, including cold storage for digital assets and segregated client accounts.</p>
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div><div className="text-2xl font-bold text-accent">99.9%</div><div className="text-xs text-primary-foreground/60">Uptime</div></div>
-                    <div><div className="text-2xl font-bold text-accent">0</div><div className="text-xs text-primary-foreground/60">Security Breaches</div></div>
+
+            {/* Security Visual Card */}
+            <div className="gradient-border rounded-xl reveal-right">
+              <Card className="shadow-elevation-lg glass-card overflow-hidden">
+                <CardContent className="p-8 space-y-6 relative z-10">
+                  <div className="icon-badge-blue">
+                    <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-heading font-bold text-foreground">Transparent Auditing Standards</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Every transaction on AssetVault generates a permanent record with cryptographic verification hashes and detailed status receipts.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  <div className="p-4 rounded-xl bg-background border">
+                    <div className="text-2xl font-heading font-bold text-primary">100%</div>
+                    <div className="text-xs text-muted-foreground mt-1">Proof of Reserves</div>
                   </div>
-                </CardContent>
-              </Card>
-              <div className="space-y-5">
-                {confidenceItems.slice(3).map((item) => (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
-                    </div>
+                  <div className="p-4 rounded-xl bg-background border">
+                    <div className="text-2xl font-heading font-bold text-emerald-500">24/7</div>
+                    <div className="text-xs text-muted-foreground mt-1">Transaction Monitoring</div>
                   </div>
-                ))}
-              </div>
+                </div>
+              </CardContent>
+            </Card>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials — 8 */}
-      <section className="py-16 bg-muted/30">
-        <div className="container">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">What Our Investors Say</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Real feedback from verified investors around the world.</p>
+      {/* ─── Frequently Asked Questions ─── */}
+      <section className="py-16 lg:py-20 bg-muted/40 border-y">
+        <div className="container max-w-3xl space-y-10">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+              Common Questions
+            </div>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Clear answers to help you navigate your investments with complete clarity.
+            </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testimonials.map((t) => (
-              <Card key={t.name}>
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: t.rating }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-accent text-accent" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground">"{t.text}"</p>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                        {t.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm flex items-center gap-1.5">
-                          {t.name}
-                          {t.verified && <CheckCircle2 className="h-3.5 w-3.5 text-success" />}
-                        </div>
-                        <div className="text-xs text-muted-foreground">{t.role} • {t.country}</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Homepage FAQ */}
-      <section className="py-16">
-        <div className="container max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Common Questions</h2>
-            <p className="text-muted-foreground">Quick answers to help you get started with confidence.</p>
-          </div>
           <Accordion type="single" collapsible className="space-y-3">
             {homepageFaqs.map((faq, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="border rounded-lg px-4 data-[state=open]:bg-muted/30">
-                <AccordionTrigger className="text-sm font-medium hover:no-underline py-4">
-                  <span className="flex items-center gap-2 text-left">
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="border border-border/80 rounded-xl px-5 bg-card shadow-elevation-sm data-[state=open]:border-primary/50"
+              >
+                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-4 text-left text-foreground">
+                  <span className="flex items-center gap-3">
                     <HelpCircle className="h-4 w-4 text-primary shrink-0" />
                     {faq.q}
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground pb-4 pl-6">
+                <AccordionContent className="text-sm text-muted-foreground pb-5 pl-7 leading-relaxed">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
-          <div className="text-center mt-8">
-            <Button variant="outline" asChild>
-              <Link to="/faq">View All FAQs <ArrowRight className="ml-2 h-4 w-4" /></Link>
+
+          <div className="text-center pt-4">
+            <Button variant="outline" asChild className="font-semibold">
+              <Link to="/faq">
+                View Complete FAQ Directory <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Download App */}
-      <section className="py-16 bg-muted/30">
+      {/* ─── Mobile Platform Showcase ─── */}
+      <section className="py-16 lg:py-20">
         <div className="container">
-          <Card className="bg-gradient-hero text-primary-foreground border-0">
-            <CardContent className="p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-8">
-              <div className="flex-1 space-y-4">
-                <h2 className="text-3xl font-bold">Download Our Mobile App</h2>
-                <p className="text-primary-foreground/80">Trade and monitor your investments on the go. Available for iOS and Android with real-time notifications and full portfolio management.</p>
-                <div className="flex gap-3">
-                  <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    <Smartphone className="mr-2 h-4 w-4" /> App Store
+          <Card className="border border-border shadow-elevation-lg bg-card overflow-hidden">
+            <CardContent className="p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-10">
+              <div className="flex-1 space-y-5">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+                  Anywhere Access
+                </div>
+                <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+                  Manage Your Investments On Any Device
+                </h2>
+                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                  The AssetVault portal is fully optimized for mobile, tablet, and desktop environments. Monitor asset performance, initiate transfers, and copy trades wherever you are.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Button asChild className="font-semibold shadow-sm">
+                    <Link to={investLink}>
+                      Open Investor Portal <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
-                  <Button variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                    <Smartphone className="mr-2 h-4 w-4" /> Google Play
+                  <Button variant="outline" asChild className="font-semibold">
+                    <Link to="/education">Investor Guide</Link>
                   </Button>
                 </div>
               </div>
-              <div className="flex-shrink-0 animate-slide-in-right">
-                <div className="w-64 h-auto rounded-2xl overflow-hidden shadow-elevation-2xl border-4 border-primary-foreground/20 rotate-2 hover:rotate-0 transition-transform duration-500">
-                  <img src={appMockup} alt="AssetVault Mobile App" className="w-full h-full object-cover" />
+
+              <div className="flex-shrink-0">
+                <div className="w-64 sm:w-72 h-auto rounded-2xl overflow-hidden shadow-elevation-xl border border-border">
+                  <img src={appMockup} alt="AssetVault Mobile Experience" className="w-full h-full object-cover" />
                 </div>
               </div>
             </CardContent>
@@ -489,18 +648,29 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-16">
-        <div className="container text-center space-y-5">
-          <h2 className="text-3xl font-bold">{content.cta_title}</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">{content.cta_subtitle}</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" asChild>
-              <Link to={investLink}>{user ? "Go to Investments" : "Create Free Account"} <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/plans">Explore Plans</Link>
-            </Button>
+      {/* ─── Final Call to Action ─── */}
+      <section className="py-20 lg:py-28 bg-slate-950 text-white relative overflow-hidden">
+        {/* Glow behind CTA */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[400px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+        
+        <div className="container relative z-10">
+          <div className="text-center max-w-3xl mx-auto space-y-8 glass p-10 sm:p-14 rounded-3xl border-white/10 reveal">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-white leading-tight">
+              {content.cta_title}
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+              {content.cta_subtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+              <Button size="lg" asChild className="font-semibold shadow-lg glow-primary">
+                <Link to={investLink}>
+                  {user ? "Go to Dashboard" : "Create Account"} <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="lg" className="bg-white/10 backdrop-blur-md text-white hover:bg-white/20 font-semibold shadow-md border border-white/20 transition-colors" asChild>
+                <Link to="/plans">View Investment Plans</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

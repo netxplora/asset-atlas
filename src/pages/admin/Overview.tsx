@@ -116,8 +116,8 @@ export default function AdminOverview() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Admin Overview</h1>
-          <p className="text-sm text-muted-foreground mt-1">Platform summary and pending actions.</p>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Admin Control Panel</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Consolidated platform metrics and pending review actions.</p>
         </div>
         {!isLoading && pendingActions.length > 0 && (
           <Badge variant="outline" className="border-warning text-warning font-semibold px-3 py-1 text-xs self-start sm:self-auto">

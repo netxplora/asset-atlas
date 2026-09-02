@@ -75,7 +75,7 @@ export default function AdminBrand() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-heading">Brand & CMS Center</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Brand & CMS Center</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage global platform branding, company details, and theme settings.</p>
       </div>
 

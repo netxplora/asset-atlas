@@ -58,7 +58,7 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
 
     // Apply Colors
-    if (settings.primary_color) {
+    if (settings.primary_color && settings.primary_color !== '#0f172a') {
       const hsl = hexToHsl(settings.primary_color);
       if (hsl) root.style.setProperty('--primary', hsl);
     }

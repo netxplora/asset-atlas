@@ -78,7 +78,7 @@ export default function Transactions() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Transaction History</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Transaction History</h1>
           <p className="text-muted-foreground text-sm mt-1">View and manage all your deposits, withdrawals, and investments.</p>
         </div>
         <div className="flex items-center gap-2">

@@ -112,7 +112,7 @@ export default function Profile() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold font-heading">Account Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Account Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your personal information, security preferences, and verification status.</p>
       </div>
 

@@ -76,7 +76,7 @@ export default function AdminLegalDocs() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Legal Documents</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Legal Documents</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Manage the platform's legal and compliance pages. Changes are reflected on the public site immediately.
           </p>
@@ -131,7 +131,7 @@ export default function AdminLegalDocs() {
           <ArrowLeft className="h-4 w-4" /> Back
         </Button>
         <div>
-          <h1 className="text-2xl font-bold font-heading">{activeMeta?.title || "Edit Document"}</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">{activeMeta?.title || "Edit Document"}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">/{activeDoc}</p>
         </div>
       </div>

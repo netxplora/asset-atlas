@@ -1,144 +1,269 @@
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { PublicLayout } from "@/components/PublicLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
-  BookOpen, TrendingUp, BarChart3, Shield, PieChart, Brain,
-  ArrowRight, CheckCircle2, Globe
+  BookOpen, TrendingUp, BarChart3, ShieldCheck, PieChart, Brain,
+  ArrowRight, CheckCircle2, Globe, Search, HelpCircle, Layers
 } from "lucide-react";
-import heroLegal from "@/assets/hero-legal.png";
+import heroMain from "@/assets/hero-main.jpg";
 
 const categories = [
   {
+    id: "basics",
     title: "Investing Basics",
-    desc: "Learn the fundamentals of investing, including how markets work, types of assets, and key terminology every investor should know.",
+    desc: "Learn core fundamentals of capital management, asset classifications, and how financial markets function.",
     icon: BookOpen,
     topics: [
-      "What is investing and why it matters",
-      "Understanding asset classes (Forex, Crypto, Commodities)",
-      "Risk vs. reward: finding the right balance",
-      "How to set investment goals",
-      "The power of compound returns",
+      "Asset class fundamentals (Forex, Cryptocurrency, Commodities)",
+      "Balancing risk exposure against target returns",
+      "Structuring long-term capital horizons",
+      "Compounding mechanics and reinvestment strategy",
+      "Understanding order types and trade lifecycles",
     ],
   },
   {
-    title: "Forex Education",
-    desc: "Understand how the foreign exchange market operates, including currency pairs, spreads, and factors that drive currency valuations.",
+    id: "forex",
+    title: "Forex Market Mechanics",
+    desc: "Understand global currency trading, exchange rate drivers, liquidity cycles, and spread management.",
     icon: Globe,
     topics: [
-      "What is Forex trading?",
-      "Understanding currency pairs and spreads",
-      "Major vs. minor vs. exotic pairs",
-      "Economic indicators that affect exchange rates",
-      "Common Forex trading strategies",
+      "Major, minor, and emerging currency pairs",
+      "Bid-ask spreads and liquidity provider mechanics",
+      "Central bank monetary policies and interest rate impacts",
+      "Economic calendar interpretation and news releases",
+      "Risk mitigation in volatile currency sessions",
     ],
   },
   {
-    title: "Cryptocurrency Education",
-    desc: "Learn about blockchain technology, major cryptocurrencies, wallet security, and how digital assets fit into a diversified portfolio.",
+    id: "crypto",
+    title: "Cryptocurrency & Digital Assets",
+    desc: "Understand on-chain mechanics, token utility, multi-signature custody, and digital asset portfolio allocation.",
     icon: BarChart3,
     topics: [
-      "What is blockchain and how does it work?",
-      "Understanding Bitcoin, Ethereum, and altcoins",
-      "How to evaluate cryptocurrency projects",
-      "Wallet security and private key management",
-      "Crypto market cycles and volatility",
+      "Bitcoin, Ethereum, and digital asset valuation models",
+      "Cold storage custody and multi-signature security",
+      "On-chain transactions and hash verification",
+      "Market cycle volatility and risk management",
+      "Direct wallet transfers and network confirmations",
     ],
   },
   {
-    title: "Risk Management",
-    desc: "Discover strategies to protect your capital, manage exposure, and make informed decisions even during market downturns.",
-    icon: Shield,
+    id: "risk",
+    title: "Risk & Capital Management",
+    desc: "Learn essential safeguards to protect principal capital, control drawdowns, and maintain systematic discipline.",
+    icon: ShieldCheck,
     topics: [
-      "Why risk management matters",
-      "Position sizing and capital allocation",
-      "Setting stop-loss and take-profit levels",
-      "Emotional discipline in investing",
-      "Hedging strategies for portfolio protection",
+      "Position sizing guidelines based on account equity",
+      "Defining automated stop-loss and take-profit parameters",
+      "Avoiding emotional decision-making in volatile markets",
+      "Segregated fund protection and counterparty awareness",
+      "Hedging techniques across correlated asset classes",
     ],
   },
   {
+    id: "diversification",
     title: "Portfolio Diversification",
-    desc: "Learn why spreading your investments across different assets and strategies is one of the most effective ways to manage risk.",
+    desc: "Learn how allocating capital across uncorrelated asset classes reduces portfolio volatility over time.",
     icon: PieChart,
     topics: [
-      "What is diversification and why it works",
-      "Building a balanced portfolio",
-      "Asset allocation by risk profile",
-      "Rebalancing your portfolio over time",
-      "Diversification across geographies and sectors",
+      "Asset class correlation matrices and risk distribution",
+      "Periodic rebalancing methods to protect gains",
+      "Balancing high-liquidity vs. tangible store-of-value assets",
+      "Conservative vs. growth-oriented portfolio models",
+      "Monitoring performance metrics across market cycles",
     ],
   },
   {
-    title: "Market Analysis",
-    desc: "Understand the tools and techniques professional traders use to analyze markets and identify investment opportunities.",
+    id: "copytrading",
+    title: "Copy Trading Strategy",
+    desc: "Explore how automated copy trading works, how to evaluate trader track records, and how to manage copy allocations.",
     icon: Brain,
     topics: [
-      "Technical analysis fundamentals",
-      "Reading charts and price patterns",
-      "Fundamental analysis for long-term investing",
-      "Using economic calendars and news events",
-      "Sentiment analysis and market psychology",
+      "Evaluating trader win rates, historical drawdowns, and tenure",
+      "Setting individual trader allocation caps",
+      "Managing proportional trade sizing in real time",
+      "Monitoring open positions from your investor portal",
+      "Knowing when to adjust or pause trader subscriptions",
     ],
   },
+];
+
+const glossaryTerms = [
+  { term: "ROI (Return on Investment)", def: "A performance measure used to evaluate the efficiency or profitability of an investment, calculated as net profit divided by initial capital." },
+  { term: "Segregated Accounts", def: "A fund safety practice where investor balances are kept completely separate from company operational funds." },
+  { term: "Spread", def: "The difference between the bid (buy) price and the ask (sell) price of a financial asset in the market." },
+  { term: "Cold Storage", def: "An offline security protocol for digital assets designed to protect private keys from unauthorized online access." },
+  { term: "KYC (Know Your Customer)", def: "A standard regulatory verification process that confirms the identity of registered investors to protect platform integrity." },
+  { term: "Stop Loss", def: "A risk management instruction designed to limit potential losses on an open investment position if prices move unfavorably." },
 ];
 
 const quickTips = [
-  "Start with an amount you're comfortable with — you can always increase your investment later.",
-  "Diversify across asset classes to reduce risk. Don't put all your capital into one plan.",
-  "Complete your KYC verification early to avoid delays when you want to withdraw.",
-  "Review your portfolio regularly and adjust your strategy as your goals change.",
-  "Read the risk disclosure before investing. Understand what you're committing to.",
-  "Enable two-factor authentication (2FA) to protect your account from unauthorized access.",
+  "Start with an allocation you are fully comfortable with and scale systematically over time.",
+  "Diversify across multiple asset classes rather than concentrating capital into a single strategy.",
+  "Complete identity verification (KYC) immediately upon registration to ensure unrestricted withdrawal access.",
+  "Review your portfolio analytics regularly and maintain clear financial objectives.",
+  "Review the formal Risk Disclosure to understand product terms and market risks.",
+  "Enable Two-Factor Authentication (2FA) in your security settings to safeguard your login credentials.",
 ];
 
 export default function Education() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const filteredCategories = useMemo(() => {
+    return categories.filter((cat) => {
+      const matchesCategory = selectedCategory === "all" || cat.id === selectedCategory;
+      const matchesSearch =
+        cat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cat.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cat.topics.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [searchQuery, selectedCategory]);
+
   return (
     <PublicLayout>
-      <SEOHead title="Education Center" description="Learn about investing, Forex, cryptocurrency, risk management, and portfolio strategy. Build your knowledge with AssetVault's investor education hub." path="/education" />
+      <SEOHead
+        title="Investor Education Center - AssetVault"
+        description="Comprehensive investor guides covering Forex, Cryptocurrency, Commodities, Risk Management, and Financial Terminology."
+        path="/education"
+      />
 
-      {/* Hero */}
-      <section className="relative min-h-[320px] flex items-center">
+      {/* Header Banner */}
+      <section className="relative bg-slate-950 text-white py-20 lg:py-28 border-b overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroLegal} alt="Education Center" className="w-full h-full object-cover" width={1920} height={640} />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
+          <img src={heroMain} alt="Education AssetVault" className="w-full h-full object-cover opacity-40 hero-kenburns" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
         </div>
-        <div className="container relative z-10 py-16 md:py-20 text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 text-sm bg-white/10 text-white backdrop-blur-sm">
-            <BookOpen className="h-4 w-4 text-accent" /> Investor Knowledge
+        <div className="container text-left space-y-4 max-w-3xl relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider text-slate-300 border border-white/15 backdrop-blur-sm">
+            Investor Knowledge Hub
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white">Education Center</h1>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg">Build your investing knowledge. Whether you're new to investing or experienced, our guides cover everything you need.</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-white drop-shadow-md">
+            Investor Education Center
+          </h1>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed drop-shadow-md max-w-2xl">
+            Essential market guides and practical concepts to help you navigate your investments with clarity and discipline.
+          </p>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-16">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Browse by Topic</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Select a category below to explore key concepts and practical knowledge.</p>
+      {/* Search & Topic Filter Bar */}
+      <section className="py-8 bg-card border-b">
+        <div className="container max-w-4xl space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search educational topics or concepts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11 text-sm bg-background"
+            />
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((cat, i) => (
-              <Card key={cat.title} className="hover:shadow-md transition-shadow animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <cat.icon className="h-5 w-5 text-primary" />
+
+          <div className="flex flex-wrap gap-2 pt-1">
+            {[
+              { id: "all", label: "All Topics" },
+              { id: "basics", label: "Basics" },
+              { id: "forex", label: "Forex" },
+              { id: "crypto", label: "Crypto" },
+              { id: "risk", label: "Risk Management" },
+              { id: "diversification", label: "Diversification" },
+              { id: "copytrading", label: "Copy Trading" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedCategory(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  selectedCategory === tab.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Educational Topic Cards */}
+      <section className="py-16 lg:py-20">
+        <div className="container space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Core Learning Modules
+            </h2>
+            <p className="text-muted-foreground text-xs sm:text-sm">
+              Structured modules designed for investors at every stage of their financial journey.
+            </p>
+          </div>
+
+          {filteredCategories.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCategories.map((cat) => (
+                <Card key={cat.id} className="border border-border shadow-elevation-sm hover:shadow-elevation-md transition-shadow bg-card flex flex-col justify-between">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                        <cat.icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-heading font-bold text-base text-foreground">{cat.title}</h3>
                     </div>
-                    <h3 className="font-semibold text-lg">{cat.title}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{cat.desc}</p>
-                  <ul className="space-y-2">
-                    {cat.topics.map((topic) => (
-                      <li key={topic} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
-                        <span className="text-muted-foreground">{topic}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{cat.desc}</p>
+                    <div className="pt-3 border-t space-y-2">
+                      <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider block">Key Concepts:</span>
+                      <ul className="space-y-1.5">
+                        {cat.topics.map((topic) => (
+                          <li key={topic} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+                            <span>{topic}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-muted/20 border border-dashed rounded-xl space-y-2">
+              <p className="text-sm font-semibold text-foreground">No matching educational topics found.</p>
+              <p className="text-xs text-muted-foreground">Try modifying your search or reset your filter.</p>
+              <Button variant="outline" size="sm" onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }}>
+                Reset Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Financial Glossary */}
+      <section className="py-16 bg-muted/30 border-y">
+        <div className="container max-w-4xl space-y-8">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+              Terminology
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Essential Financial Glossary
+            </h2>
+            <p className="text-muted-foreground text-xs sm:text-sm">
+              Standard definitions of key terminology used throughout the AssetVault platform.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {glossaryTerms.map((g) => (
+              <Card key={g.term} className="border border-border bg-card">
+                <CardContent className="p-4 sm:p-5 space-y-1.5">
+                  <h4 className="font-heading font-bold text-sm text-foreground">{g.term}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{g.def}</p>
                 </CardContent>
               </Card>
             ))}
@@ -146,20 +271,27 @@ export default function Education() {
         </div>
       </section>
 
-      {/* Quick Tips */}
-      <section className="py-16 bg-muted/30">
-        <div className="container max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-3">Quick Tips for New Investors</h2>
-            <p className="text-muted-foreground text-sm">Practical advice to help you get started on the right foot.</p>
+      {/* Quick Tips for Investors */}
+      <section className="py-16">
+        <div className="container max-w-3xl space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+              Practical Guidelines for Investors
+            </h2>
+            <p className="text-muted-foreground text-xs sm:text-sm">
+              Prudent practices to support informed, long-term portfolio growth.
+            </p>
           </div>
-          <Card>
-            <CardContent className="p-6 md:p-8">
+
+          <Card className="border border-border bg-card shadow-elevation-sm">
+            <CardContent className="p-6 sm:p-8">
               <ul className="space-y-4">
                 {quickTips.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm">
-                    <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</div>
-                    <span>{tip}</span>
+                  <li key={i} className="flex items-start gap-3 text-xs sm:text-sm">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                      {i + 1}
+                    </div>
+                    <span className="text-muted-foreground leading-relaxed">{tip}</span>
                   </li>
                 ))}
               </ul>
@@ -168,17 +300,23 @@ export default function Education() {
         </div>
       </section>
 
-      {/* Blog Link */}
-      <section className="py-16">
-        <div className="container text-center space-y-5">
-          <h2 className="text-2xl font-bold">Want More In-Depth Content?</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto text-sm">Check out our blog for detailed articles, market updates, and investment insights written by our team.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild>
-              <Link to="/blog">Read Our Blog <ArrowRight className="ml-2 h-4 w-4" /></Link>
+      {/* Closing CTA */}
+      <section className="py-16 bg-slate-950 text-white border-t">
+        <div className="container text-center max-w-2xl space-y-5">
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold text-white">
+            Apply Your Knowledge With AssetVault
+          </h2>
+          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            Create an account to explore structured investment plans and verified copy trading strategies today.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Button size="lg" asChild className="font-semibold shadow-sm">
+              <Link to="/register">
+                Open Investor Account <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
-            <Button variant="outline" asChild>
-              <Link to="/faq">View FAQ</Link>
+            <Button size="lg" variant="outline" asChild className="border-white/30 text-white hover:bg-white/10 font-semibold">
+              <Link to="/plans">Explore Investment Plans</Link>
             </Button>
           </div>
         </div>

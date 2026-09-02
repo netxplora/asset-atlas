@@ -72,8 +72,8 @@ export default function Withdraw() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold font-heading">Withdraw Funds</h1>
-        <p className="text-muted-foreground text-sm mt-1">Transfer your available balance to your external wallet or bank.</p>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Withdraw Funds</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Submit a withdrawal request to your external cryptocurrency wallet or bank account.</p>
       </div>
 
       {!profileLoading && !kycVerified && (

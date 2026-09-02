@@ -60,7 +60,7 @@ export default function AdminWallets() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Wallet Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Wallet Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{isLoading ? 'Loading...' : `${wallets.length} wallet addresses configured`}</p>
         </div>
         <Button onClick={openCreate} className="shadow-sm"><Plus className="h-4 w-4 mr-1" /> Add Wallet</Button>

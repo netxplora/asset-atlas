@@ -60,7 +60,7 @@ export default function AdminBlogs() {
           <Button variant="ghost" size="sm" onClick={() => setEditing(null)} className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Back to Posts
           </Button>
-          <h1 className="text-2xl font-bold font-heading">{editing.id ? "Edit Post" : "New Post"}</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">{editing.id ? "Edit Post" : "New Post"}</h1>
         </div>
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-6">
@@ -203,7 +203,7 @@ export default function AdminBlogs() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Blog Posts</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground tracking-tight">Blog Posts</h1>
           <p className="text-sm text-muted-foreground mt-1">Create and manage content for your platform's blog.</p>
         </div>
         <Button onClick={handleNew}><Plus className="h-4 w-4 mr-1" /> New Post</Button>

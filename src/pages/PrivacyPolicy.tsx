@@ -1,6 +1,7 @@
 import { PublicLayout } from "@/components/PublicLayout";
 import { useCmsPageBySlug } from "@/hooks/useCmsData";
 import { Loader2 } from "lucide-react";
+import DOMPurify from "dompurify";
 import heroLegal from "@/assets/hero-legal.png";
 
 export default function PrivacyPolicy() {
@@ -53,7 +54,7 @@ export default function PrivacyPolicy() {
           
           <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-heading prose-headings:font-semibold animate-fade-in-up" style={{ animationDelay: "300ms" }}>
             {page?.content ? (
-              <div dangerouslySetInnerHTML={{ __html: page.content }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }} />
             ) : (
               <>
                 <h2 id="information-we-collect" className="text-2xl mt-0">1. Information We Collect</h2>

@@ -189,7 +189,17 @@ export const useUpdateProfile = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (updates: { first_name?: string; last_name?: string; email?: string; avatar_url?: string }) => {
+    mutationFn: async (updates: { 
+      first_name?: string; 
+      last_name?: string; 
+      email?: string; 
+      avatar_url?: string;
+      phone?: string;
+      country?: string;
+      date_of_birth?: string;
+      marketing_emails?: boolean;
+      security_emails?: boolean;
+    }) => {
       const { error } = await supabase.from("profiles").update(updates).eq("user_id", user?.id);
       if (error) throw error;
     },
@@ -1145,6 +1155,46 @@ export const useCreateUserInvestment = () => {
       toast.success("Investment started successfully!");
     },
     onError: (error: any) => toast.error(error.message || "Failed to start investment"),
+  });
+};
+
+export const useCancelInvestment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (investmentId: string) => {
+      const { data, error } = await supabase.rpc("cancel_investment", {
+        p_investment_id: investmentId,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userInvestments"] });
+      queryClient.invalidateQueries({ queryKey: ["adminUserInvestments"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast.success("Investment cancelled. Refund processed.");
+    },
+    onError: (error: Error) => toast.error(error.message || "Failed to cancel investment"),
+  });
+};
+
+export const useAdminCancelInvestment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ investmentId, reason }: { investmentId: string; reason?: string }) => {
+      const { data, error } = await supabase.rpc("admin_cancel_investment", {
+        p_investment_id: investmentId,
+        p_reason: reason || "Admin cancelled",
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUserInvestments"] });
+      queryClient.invalidateQueries({ queryKey: ["userInvestments"] });
+      toast.success("Investment force-cancelled. Full refund issued.");
+    },
+    onError: (error: Error) => toast.error(error.message || "Failed to cancel investment"),
   });
 };
 

@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Upload, CheckCircle2, Clock, XCircle, User, Loader2, FileCheck, Lock, Smartphone, ShieldAlert, Check, Image as ImageIcon, Activity, History, Server, ShieldCheck } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useTheme } from "next-themes";
+import { Shield, Upload, CheckCircle2, Clock, XCircle, User, Loader2, FileCheck, Lock, Smartphone, ShieldAlert, Check, Image as ImageIcon, Activity, History, Server, ShieldCheck, Settings, Trash2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile, useUpdateProfile, useSubmitKYC } from "@/hooks/useSupabaseData";
@@ -34,7 +36,16 @@ export default function Profile() {
     last_name: "",
     email: "",
     avatar_url: "",
+    phone: "",
+    country: "",
+    date_of_birth: "",
+    marketing_emails: true,
+    security_emails: true,
   });
+
+  const [passwordForm, setPasswordForm] = useState({ new_password: "", confirm_password: "" });
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (profile) {
@@ -43,6 +54,11 @@ export default function Profile() {
         last_name: profile.last_name || "",
         email: profile.email || "",
         avatar_url: profile.avatar_url || "",
+        phone: profile.phone || "",
+        country: profile.country || "",
+        date_of_birth: profile.date_of_birth || "",
+        marketing_emails: profile.marketing_emails ?? true,
+        security_emails: profile.security_emails ?? true,
       });
     }
   }, [profile]);
@@ -52,13 +68,34 @@ export default function Profile() {
       first_name: formData.first_name,
       last_name: formData.last_name,
       avatar_url: formData.avatar_url,
+      phone: formData.phone,
+      country: formData.country,
+      date_of_birth: formData.date_of_birth,
+      marketing_emails: formData.marketing_emails,
+      security_emails: formData.security_emails,
     });
   };
 
   const handleUpdatePassword = async () => {
-    if (!formData.email) return;
-    toast({ title: "Password Reset Requested", description: "A password reset link will be sent to your email shortly." });
-    await supabase.auth.resetPasswordForEmail(formData.email);
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (passwordForm.new_password.length < 6) {
+      toast({ title: "Password too short", description: "Must be at least 6 characters.", variant: "destructive" });
+      return;
+    }
+    
+    setUpdatingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: passwordForm.new_password });
+    setUpdatingPassword(false);
+    
+    if (error) {
+      toast({ title: "Update Failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Password Updated", description: "Your password has been successfully changed." });
+      setPasswordForm({ new_password: "", confirm_password: "" });
+    }
   };
 
   const handleKycSubmit = async () => {
@@ -140,9 +177,10 @@ export default function Profile() {
       )}
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full sm:w-[400px] grid-cols-2 mb-6">
+        <TabsList className="grid w-full sm:w-[400px] grid-cols-3 mb-6">
           <TabsTrigger value="general" className="flex items-center gap-2"><User className="h-4 w-4" /> General</TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2"><Lock className="h-4 w-4" /> Security</TabsTrigger>
+          <TabsTrigger value="preferences" className="flex items-center gap-2"><Settings className="h-4 w-4" /> Preferences</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6 animate-fade-in-up">
@@ -211,12 +249,30 @@ export default function Profile() {
                     <Input placeholder="Doe" value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} className="h-12 bg-muted/50" />
                   )}
                 </div>
-                <div className="space-y-3 sm:col-span-2">
+                <div className="space-y-3">
+                  <Label>Phone Number</Label>
+                  {isLoading ? <Skeleton className="h-10 w-full" /> : (
+                    <Input placeholder="+1 234 567 8900" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="h-12 bg-muted/50" />
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <Label>Country</Label>
+                  {isLoading ? <Skeleton className="h-10 w-full" /> : (
+                    <Input placeholder="e.g. United States" value={formData.country} onChange={e => setFormData({...formData, country: e.target.value})} className="h-12 bg-muted/50" />
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <Label>Date of Birth</Label>
+                  {isLoading ? <Skeleton className="h-10 w-full" /> : (
+                    <Input type="date" value={formData.date_of_birth} onChange={e => setFormData({...formData, date_of_birth: e.target.value})} className="h-12 bg-muted/50" />
+                  )}
+                </div>
+                <div className="space-y-3">
                   <Label>Email Address</Label>
                   {isLoading ? <Skeleton className="h-10 w-full" /> : (
                     <Input value={formData.email} disabled className="h-12 bg-muted opacity-70 cursor-not-allowed" />
                   )}
-                  <p className="text-xs text-muted-foreground">Email addresses cannot be changed once registered for security reasons.</p>
+                  <p className="text-xs text-muted-foreground">Email addresses cannot be changed once registered.</p>
                 </div>
               </div>
 
@@ -238,17 +294,30 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="p-6 space-y-6">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border bg-muted/20">
+              <div className="grid gap-4 p-4 rounded-lg border bg-muted/10">
                 <div>
-                  <h4 className="font-semibold text-sm">Account Password</h4>
-                  <p className="text-sm text-muted-foreground mt-1">We will send a secure password reset link to <strong>{formData.email}</strong>.</p>
+                  <h4 className="font-semibold text-sm">Change Password</h4>
+                  <p className="text-sm text-muted-foreground mt-1">Update your password to keep your account secure.</p>
                 </div>
-                <Button variant="outline" onClick={handleUpdatePassword} className="shrink-0 shadow-sm">
-                  Send Reset Link
-                </Button>
+                <div className="grid sm:grid-cols-2 gap-4 mt-2">
+                  <div className="space-y-2">
+                    <Label>New Password</Label>
+                    <Input type="password" placeholder="••••••••" value={passwordForm.new_password} onChange={e => setPasswordForm({...passwordForm, new_password: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Confirm Password</Label>
+                    <Input type="password" placeholder="••••••••" value={passwordForm.confirm_password} onChange={e => setPasswordForm({...passwordForm, confirm_password: e.target.value})} />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2">
+                  <Button onClick={handleUpdatePassword} disabled={updatingPassword || !passwordForm.new_password} className="shrink-0">
+                    {updatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Update Password
+                  </Button>
+                </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border bg-muted/20">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border bg-muted/10">
                 <div className="flex items-start gap-3">
                   <div className="mt-1 bg-primary/10 p-2 rounded-full">
                     <Smartphone className="h-5 w-5 text-primary" />
@@ -260,6 +329,21 @@ export default function Profile() {
                 </div>
                 <Button onClick={() => toast({ title: "Coming Soon", description: "2FA setup is currently being upgraded." })} className="shrink-0 shadow-sm">
                   Set Up 2FA
+                </Button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 bg-destructive/10 p-2 rounded-full">
+                    <Trash2 className="h-5 w-5 text-destructive" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-destructive">Delete Account</h4>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-md">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                  </div>
+                </div>
+                <Button variant="destructive" onClick={() => toast({ title: "Contact Support", description: "Please contact support to process account deletion for security and compliance reasons." })} className="shrink-0">
+                  Delete Account
                 </Button>
               </div>
 
@@ -378,28 +462,78 @@ export default function Profile() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="preferences" className="space-y-6 animate-fade-in-up">
+          <Card>
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-lg flex items-center gap-2"><Settings className="h-5 w-5 text-primary" /> App Preferences</CardTitle>
+              <CardDescription>Customize your experience and notifications.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-8">
+              
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Appearance</h3>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="font-medium text-sm">Dark Mode</div>
+                    <div className="text-xs text-muted-foreground mt-1">Switch between light and dark themes.</div>
+                  </div>
+                  <Switch 
+                    checked={theme === "dark"} 
+                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Notifications</h3>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="font-medium text-sm">Security Alerts</div>
+                    <div className="text-xs text-muted-foreground mt-1">Receive emails about unusual logins or password changes.</div>
+                  </div>
+                  <Switch 
+                    checked={formData.security_emails} 
+                    onCheckedChange={(checked) => { setFormData({...formData, security_emails: checked}); updateProfile.mutate({ security_emails: checked }); }} 
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="font-medium text-sm">Marketing & Updates</div>
+                    <div className="text-xs text-muted-foreground mt-1">Receive news, updates, and promotional content.</div>
+                  </div>
+                  <Switch 
+                    checked={formData.marketing_emails} 
+                    onCheckedChange={(checked) => { setFormData({...formData, marketing_emails: checked}); updateProfile.mutate({ marketing_emails: checked }); }} 
+                  />
+                </div>
+              </div>
+
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* KYC Submission Dialog */}
       <Dialog open={kycDialogOpen} onOpenChange={setKycDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-md w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-heading">Complete Identity Verification</DialogTitle>
-            <DialogDescription>
-              Submit your government-issued ID to verify your account and unlock all features.
+            <DialogDescription className="text-sm">
+              Submit your government-issued ID to verify your account.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-5 py-2">
+          <div className="space-y-4 py-1">
             
-            <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 space-y-2">
+            <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 space-y-1">
               <h4 className="font-semibold text-sm flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Secure & Encrypted</h4>
-              <p className="text-xs text-muted-foreground">Your data is securely encrypted and stored in compliance with global privacy regulations. We use this solely to verify your identity.</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Your data is securely encrypted and stored in compliance with global privacy regulations.</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-sm font-medium">Document Type</Label>
               <Select value={kycForm.idType} onValueChange={v => setKycForm(f => ({ ...f, idType: v }))}>
-                <SelectTrigger className="h-12"><SelectValue placeholder="Select ID type" /></SelectTrigger>
+                <SelectTrigger className="h-10"><SelectValue placeholder="Select ID type" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="passport">Passport</SelectItem>
                   <SelectItem value="drivers_license">Driver's License</SelectItem>
@@ -408,17 +542,17 @@ export default function Profile() {
               </Select>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-sm font-medium">Document Number</Label>
               <Input 
                 value={kycForm.idNumber} 
                 onChange={e => setKycForm(f => ({ ...f, idNumber: e.target.value }))} 
                 placeholder="Enter the ID number" 
-                className="h-12 bg-muted/50"
+                className="h-10 bg-muted/50"
               />
             </div>
 
-            <div className="space-y-3 pt-2">
+            <div className="space-y-2 pt-1">
               <Label className="text-sm font-medium flex justify-between">
                 Upload Document 
                 <span className="text-xs text-muted-foreground font-normal">Max 5MB</span>
@@ -440,41 +574,40 @@ export default function Profile() {
                 }}
               />
               {kycFile ? (
-                <div className="border border-success/30 rounded-lg p-4 flex items-center justify-between gap-3 bg-success/5 animate-in fade-in">
+                <div className="border border-success/30 rounded-lg p-3 flex items-center justify-between gap-3 bg-success/5 animate-in fade-in">
                   <div className="flex items-center gap-3 min-w-0">
-                    <FileCheck className="h-8 w-8 text-success flex-shrink-0" />
+                    <FileCheck className="h-6 w-6 text-success flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate pr-4">{kycFile.name}</p>
-                      <p className="text-xs text-muted-foreground">{(kycFile.size / 1024).toFixed(1)} KB</p>
+                      <p className="text-[10px] text-muted-foreground">{(kycFile.size / 1024).toFixed(1)} KB</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0" onClick={() => { setKycFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}>
+                  <Button variant="ghost" size="sm" className="text-destructive h-8 text-xs hover:bg-destructive/10 hover:text-destructive shrink-0" onClick={() => { setKycFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}>
                     Remove
                   </Button>
                 </div>
               ) : (
                 <div
-                  className="border-2 border-dashed border-primary/20 bg-muted/20 hover:bg-muted/50 rounded-xl p-8 text-center cursor-pointer transition-colors group"
+                  className="border-2 border-dashed border-primary/20 bg-muted/20 hover:bg-muted/50 rounded-xl p-6 text-center cursor-pointer transition-colors group"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="h-12 w-12 bg-background rounded-full border shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                    <Upload className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 bg-background rounded-full border shadow-sm flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                    <Upload className="h-4 w-4 text-primary" />
                   </div>
                   <p className="text-sm font-medium mb-1">Click to browse or drag and drop</p>
-                  <p className="text-xs text-muted-foreground">Please upload a clear, uncropped image. PDF, JPG, or PNG.</p>
+                  <p className="text-xs text-muted-foreground">PDF, JPG, or PNG</p>
                 </div>
               )}
             </div>
             
-            <div className="pt-4 border-t">
+            <div className="pt-2 border-t mt-2">
               <Button
-                size="lg"
-                className="w-full font-semibold text-base"
+                className="w-full font-semibold"
                 onClick={handleKycSubmit}
                 disabled={submitKYC.isPending || uploading || !kycFile || !kycForm.idType || !kycForm.idNumber}
               >
                 {(submitKYC.isPending || uploading) ? (
-                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> {uploading ? "Uploading Securely..." : "Submitting..."}</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {uploading ? "Uploading Securely..." : "Submitting..."}</>
                 ) : (
                   "Submit Verification"
                 )}

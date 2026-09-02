@@ -1,5 +1,6 @@
 import { PublicLayout } from "@/components/PublicLayout";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import DOMPurify from "dompurify";
 import { useCmsPageBySlug } from "@/hooks/useCmsData";
 import heroLegal from "@/assets/hero-legal.png";
 
@@ -63,7 +64,7 @@ export default function RiskDisclosure() {
           
           <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-heading prose-headings:font-semibold animate-fade-in-up" style={{ animationDelay: "300ms" }}>
             {page?.content ? (
-              <div dangerouslySetInnerHTML={{ __html: page.content }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }} />
             ) : (
               <>
                 <h2 id="market-risk" className="text-2xl mt-0">1. Market Risk</h2>

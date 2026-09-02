@@ -68,8 +68,18 @@ const AdminFAQs = lazy(() => import("./pages/admin/FAQs"));
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
 const AdminSupport = lazy(() => import("./pages/admin/Support"));
 const AdminLegalDocs = lazy(() => import("./pages/admin/LegalDocs"));
+const AdminInvestments = lazy(() => import("./pages/admin/Investments"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 minutes
+      gcTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function PageLoader() {
   return (
@@ -150,6 +160,7 @@ const App = () => (
                     <Route path="users" element={<AdminUsers />} />
                     <Route path="audit" element={<AdminAuditLogs />} />
                     <Route path="plans" element={<AdminPlans />} />
+                    <Route path="investments" element={<AdminInvestments />} />
                     <Route path="traders" element={<AdminTraders />} />
                     <Route path="transactions" element={<AdminTransactions />} />
                     <Route path="deposits" element={<AdminDeposits />} />

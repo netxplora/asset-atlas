@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Wallet, ArrowDownToLine, Copy, DollarSign, 
-  Clock, CheckCircle2, AlertCircle, ArrowRight, Shield, Activity
+  Clock, CheckCircle2, AlertCircle, ArrowRight, Shield, Activity, Briefcase
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from "recharts";
-import { useAdminUsers, useAdminDeposits, useAdminWithdrawals, useAdminTraders } from "@/hooks/useSupabaseData";
+import { useAdminUsers, useAdminDeposits, useAdminWithdrawals, useAdminTraders, useAdminUserInvestments } from "@/hooks/useSupabaseData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 
@@ -15,18 +15,25 @@ export default function AdminOverview() {
   const { data: deposits = [], isLoading: depositsLoading } = useAdminDeposits();
   const { data: withdrawals = [], isLoading: withdrawalsLoading } = useAdminWithdrawals();
   const { data: traders = [], isLoading: tradersLoading } = useAdminTraders();
+  const { data: allInvestments = [], isLoading: investmentsLoading } = useAdminUserInvestments();
 
-  const isLoading = usersLoading || depositsLoading || withdrawalsLoading || tradersLoading;
+  const isLoading = usersLoading || depositsLoading || withdrawalsLoading || tradersLoading || investmentsLoading;
 
   const totalUsers = users.length;
   const verifiedUsers = users.filter((u: any) => u.kyc_status === "verified").length;
   const totalDeposits = deposits.filter((d: any) => d.status === "approved").reduce((sum: number, d: any) => sum + d.amount, 0);
   const totalWithdrawals = withdrawals.filter((w: any) => w.status === "approved").reduce((sum: number, w: any) => sum + w.amount, 0);
-  const pendingDeposits = deposits.filter((d: any) => d.status === "pending");
-  const pendingWithdrawals = withdrawals.filter((w: any) => w.status === "pending");
-  const pendingKyc = users.filter((u: any) => u.kyc_status === "pending");
-  const activeTraders = traders.filter((t: any) => t.is_active).length;
+  const pendingDeposits = (deposits as Record<string, unknown>[]).filter((d) => d.status === "pending");
+  const pendingWithdrawals = (withdrawals as Record<string, unknown>[]).filter((w) => w.status === "pending");
+  const pendingKyc = (users as Record<string, unknown>[]).filter((u) => u.kyc_status === "pending");
+  const activeTraders = (traders as Record<string, unknown>[]).filter((t) => t.is_active).length;
   const netDeposits = totalDeposits - totalWithdrawals;
+
+  // Investment metrics
+  const activeInvestments = (allInvestments as Record<string, unknown>[]).filter((i) => i.status === "active");
+  const totalCapitalLocked = activeInvestments.reduce((s, i) => s + Number(i.amount), 0);
+  const totalRoiDistributed = (allInvestments as Record<string, unknown>[]).reduce((s, i) => s + Number(i.profit_generated ?? 0), 0);
+  const activeInvestmentCount = activeInvestments.length;
 
   const stats = [
     { 
@@ -54,9 +61,25 @@ export default function AdminOverview() {
       link: "/admin/withdrawals"
     },
     { 
+      label: "Capital Locked", 
+      value: `$${totalCapitalLocked.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+      icon: Briefcase, 
+      sub: `${activeInvestmentCount} active investment${activeInvestmentCount !== 1 ? "s" : ""}`,
+      iconBg: "bg-purple-500/10 text-purple-500",
+      link: "/admin/investments"
+    },
+    { 
+      label: "ROI Distributed", 
+      value: `$${totalRoiDistributed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+      icon: DollarSign, 
+      sub: "Credited to user balances",
+      iconBg: "bg-success/10 text-success",
+      link: "/admin/investments"
+    },
+    { 
       label: "Net Revenue", 
       value: `$${netDeposits.toLocaleString()}`, 
-      icon: DollarSign, 
+      icon: Activity, 
       sub: "Deposits minus withdrawals",
       iconBg: netDeposits >= 0 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive",
       link: "/admin/transactions"
@@ -65,8 +88,8 @@ export default function AdminOverview() {
       label: "Active Traders", 
       value: activeTraders.toString(), 
       icon: Copy, 
-      sub: `${traders.length} total traders`,
-      iconBg: "bg-purple-500/10 text-purple-500",
+      sub: `${(traders as Record<string, unknown>[]).length} total traders`,
+      iconBg: "bg-blue-500/10 text-blue-500",
       link: "/admin/traders"
     },
     { 
@@ -80,33 +103,33 @@ export default function AdminOverview() {
   ];
 
   const pendingActions = [
-    ...pendingDeposits.slice(0, 4).map((d: any) => ({
-      id: d.id,
+    ...pendingDeposits.slice(0, 4).map((d) => ({
+      id: d.id as string,
       type: "deposit" as const,
-      label: `Deposit: $${d.amount?.toLocaleString()} ${d.currency || ''}`,
-      user: `${d.profiles?.first_name || ''} ${d.profiles?.last_name || ''}`.trim() || d.profiles?.email,
-      date: d.created_at,
+      label: `Deposit: $${Number(d.amount)?.toLocaleString()} ${(d.currency as string) || ''}`,
+      user: (`${(d as Record<string, Record<string,unknown>>).profiles?.first_name || ''} ${(d as Record<string, Record<string,unknown>>).profiles?.last_name || ''}`).trim() || String((d as Record<string, Record<string,unknown>>).profiles?.email || ''),
+      date: d.created_at as string,
       link: "/admin/deposits",
     })),
-    ...pendingWithdrawals.slice(0, 4).map((w: any) => ({
-      id: w.id,
+    ...pendingWithdrawals.slice(0, 4).map((w) => ({
+      id: w.id as string,
       type: "withdrawal" as const,
-      label: `Withdrawal: $${w.amount?.toLocaleString()} ${w.currency || ''}`,
-      user: `${w.profiles?.first_name || ''} ${w.profiles?.last_name || ''}`.trim() || w.profiles?.email,
-      date: w.created_at,
+      label: `Withdrawal: $${Number(w.amount)?.toLocaleString()} ${(w.currency as string) || ''}`,
+      user: (`${(w as Record<string, Record<string,unknown>>).profiles?.first_name || ''} ${(w as Record<string, Record<string,unknown>>).profiles?.last_name || ''}`).trim() || String((w as Record<string, Record<string,unknown>>).profiles?.email || ''),
+      date: w.created_at as string,
       link: "/admin/withdrawals",
     })),
-    ...pendingKyc.slice(0, 3).map((u: any) => ({
-      id: u.user_id,
+    ...pendingKyc.slice(0, 3).map((u) => ({
+      id: u.user_id as string,
       type: "kyc" as const,
-      label: `KYC Review: ${u.first_name} ${u.last_name}`,
-      user: u.email,
-      date: u.updated_at || u.created_at,
+      label: `KYC Review: ${u.first_name as string} ${u.last_name as string}`,
+      user: u.email as string,
+      date: (u.updated_at || u.created_at) as string,
       link: "/admin/kyc",
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const typeConfig: Record<string, { icon: any; color: string }> = {
+  const typeConfig: Record<string, { icon: React.ElementType; color: string }> = {
     deposit: { icon: Wallet, color: "bg-success/10 text-success" },
     withdrawal: { icon: ArrowDownToLine, color: "bg-warning/10 text-warning" },
     kyc: { icon: Shield, color: "bg-blue-500/10 text-blue-500" },
@@ -128,9 +151,9 @@ export default function AdminOverview() {
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading
-          ? Array(6).fill(0).map((_, i) => (
+          ? Array(8).fill(0).map((_, i) => (
               <Card key={i}>
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-4">
@@ -171,8 +194,7 @@ export default function AdminOverview() {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { name: "Current Month", Deposits: totalDeposits, Withdrawals: totalWithdrawals, Revenue: netDeposits },
-                  { name: "Previous Month", Deposits: totalDeposits * 0.8, Withdrawals: totalWithdrawals * 0.7, Revenue: netDeposits * 0.85 } // Mock data for comparison
+                  { name: "Current", Deposits: totalDeposits, Withdrawals: totalWithdrawals, "Capital Locked": totalCapitalLocked, "ROI Out": totalRoiDistributed },
                 ]} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -184,7 +206,8 @@ export default function AdminOverview() {
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
                   <Bar dataKey="Deposits" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Withdrawals" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Capital Locked" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="ROI Out" fill="hsl(270 60% 60%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -319,24 +342,24 @@ export default function AdminOverview() {
               ) : users.length === 0 ? (
                 <div className="p-8 text-center text-sm text-muted-foreground">No users registered yet.</div>
               ) : (
-                users.slice(0, 6).map((u: any) => (
-                  <div key={u.user_id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                (users as Record<string, unknown>[]).slice(0, 6).map((u) => (
+                  <div key={u.user_id as string} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
-                        {(u.first_name?.[0] || '?').toUpperCase()}
+                        {((u.first_name as string)?.[0] || '?').toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-medium text-sm truncate">{u.first_name} {u.last_name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{u.email}</div>
+                        <div className="font-medium text-sm truncate">{u.first_name as string} {u.last_name as string}</div>
+                        <div className="text-xs text-muted-foreground truncate">{u.email as string}</div>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-4">
-                      <div className="font-bold text-sm">${(u.balance || 0).toLocaleString()}</div>
+                      <div className="font-bold text-sm">${(Number(u.balance) || 0).toLocaleString()}</div>
                       <Badge 
                         variant={u.kyc_status === "verified" ? "default" : "outline"} 
                         className={`text-[10px] mt-1 ${u.kyc_status === "verified" ? "bg-success" : "capitalize"}`}
                       >
-                        {u.kyc_status}
+                        {u.kyc_status as string}
                       </Badge>
                     </div>
                   </div>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback, ReactNode } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AuthContextType {
   user: User | null;
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const initialSessionHandled = useRef(false);
+  const queryClient = useQueryClient();
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -128,7 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setIsAdmin(false);
-  }, [user]);
+    queryClient.clear();
+  }, [user, queryClient]);
 
   return (
     <AuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, refreshProfile }}>

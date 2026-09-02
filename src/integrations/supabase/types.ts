@@ -641,6 +641,11 @@ export type Database = {
           role: string | null
           updated_at: string
           user_id: string
+          phone: string | null
+          country: string | null
+          date_of_birth: string | null
+          marketing_emails: boolean
+          security_emails: boolean
         }
         Insert: {
           avatar_url?: string | null
@@ -659,6 +664,11 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id: string
+          phone?: string | null
+          country?: string | null
+          date_of_birth?: string | null
+          marketing_emails?: boolean
+          security_emails?: boolean
         }
         Update: {
           avatar_url?: string | null
@@ -677,6 +687,11 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+          phone?: string | null
+          country?: string | null
+          date_of_birth?: string | null
+          marketing_emails?: boolean
+          security_emails?: boolean
         }
         Relationships: []
       }
@@ -1015,6 +1030,14 @@ export type Database = {
       calculate_investment_profits: { Args: never; Returns: undefined }
       cancel_copy_trade: {
         Args: { p_current_pnl: number; p_trade_id: string; p_user_id: string }
+        Returns: Json
+      }
+      cancel_investment: {
+        Args: { p_investment_id: string }
+        Returns: Json
+      }
+      admin_cancel_investment: {
+        Args: { p_investment_id: string }
         Returns: Json
       }
       cancel_deposit_intent: {

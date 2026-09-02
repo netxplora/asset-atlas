@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock, BookOpen, ArrowRight } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -120,7 +121,7 @@ export default function BlogPost() {
               prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground
               prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
               prose-pre:bg-muted prose-pre:border prose-pre:rounded-xl"
-            dangerouslySetInnerHTML={{ __html: post.content || "" }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || "") }}
           />
 
           {/* Footer Navigation */}

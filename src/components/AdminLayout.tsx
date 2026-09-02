@@ -3,7 +3,7 @@ import { useState } from "react";
 import { 
   LayoutDashboard, Users, TrendingUp, Copy, History, 
   Shield, Settings, LogOut, Menu, Wallet, ArrowDownToLine, MessageCircle,
-  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft, FileText, Scale
+  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft, FileText, Scale, Briefcase
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ const navGroups = [
     items: [
       { label: "Users", to: "/admin/users", icon: Users },
       { label: "Plans", to: "/admin/plans", icon: TrendingUp },
+      { label: "Investments", to: "/admin/investments", icon: Briefcase },
       { label: "Traders", to: "/admin/traders", icon: Copy },
       { label: "KYC", to: "/admin/kyc", icon: Shield },
     ],

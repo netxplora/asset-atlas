@@ -23,13 +23,22 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
+          // Only split well-known standalone packages that have no internal
+          // circular init order issues. Let Vite auto-chunk everything else
+          // (especially Radix UI) to avoid TDZ "Cannot access before init" crashes.
           if (id.includes("node_modules")) {
             if (id.includes("@supabase")) return "supabase";
+            if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-")) return "recharts";
+            if (id.includes("@tanstack/react-query") || id.includes("@tanstack/query-core")) return "tanstack";
+            if (
+              id.includes("/react/") ||
+              id.includes("/react-dom/") ||
+              id.includes("/react-router") ||
+              id.includes("/scheduler/")
+            ) return "react-vendor";
             if (id.includes("lucide-react")) return "lucide";
-            if (id.includes("recharts")) return "recharts";
-            if (id.includes("@tanstack")) return "tanstack";
-            if (id.includes("react/") || id.includes("react-dom") || id.includes("react-router")) return "react-vendor";
-            return "vendor";
+            // Do NOT force @radix-ui or cmdk into a shared vendor chunk —
+            // let Rollup decide to preserve correct initialization order.
           }
         },
       },

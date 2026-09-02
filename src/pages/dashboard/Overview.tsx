@@ -17,15 +17,6 @@ import {
   useUserActiveDepositIntent, useCancelDepositIntent, useCheckDepositLifecycle
 } from "@/hooks/useSupabaseData";
 
-const performanceChartData = [
-  { month: "Jan", balance: 5000, returns: 220 },
-  { month: "Feb", balance: 5800, returns: 450 },
-  { month: "Mar", balance: 6400, returns: 680 },
-  { month: "Apr", balance: 7900, returns: 940 },
-  { month: "May", balance: 9200, returns: 1350 },
-  { month: "Jun", balance: 11000, returns: 1820 },
-];
-
 const ALLOCATION_COLORS = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6"];
 
 function StatSkeleton() {
@@ -75,11 +66,23 @@ export default function DashboardOverview() {
   const availableBalance = Math.max(totalBalance - totalInvested, 0);
 
   // Asset allocation breakdown
+  const forexTotal = activeInvestments.filter((i: any) => i.plans?.category === 'Forex' || i.plans?.category === 'forex').reduce((s: number, i: any) => s + Number(i.amount || 0), 0);
+  const cryptoTotal = activeInvestments.filter((i: any) => i.plans?.category === 'Crypto' || i.plans?.category === 'crypto').reduce((s: number, i: any) => s + Number(i.amount || 0), 0);
+  const commodityTotal = activeInvestments.filter((i: any) => i.plans?.category === 'Commodities' || i.plans?.category === 'commodities').reduce((s: number, i: any) => s + Number(i.amount || 0), 0);
+  
   const allocationData = [
-    { name: "Forex", value: activeInvestments.filter((i: any) => i.plans?.category === 'forex').reduce((s: number, i: any) => s + Number(i.amount || 0), 0) || 40 },
-    { name: "Crypto", value: activeInvestments.filter((i: any) => i.plans?.category === 'crypto').reduce((s: number, i: any) => s + Number(i.amount || 0), 0) || 35 },
-    { name: "Commodities", value: activeInvestments.filter((i: any) => i.plans?.category === 'commodities').reduce((s: number, i: any) => s + Number(i.amount || 0), 0) || 25 },
+    ...(forexTotal > 0 ? [{ name: "Forex", value: forexTotal }] : []),
+    ...(cryptoTotal > 0 ? [{ name: "Crypto", value: cryptoTotal }] : []),
+    ...(commodityTotal > 0 ? [{ name: "Commodities", value: commodityTotal }] : []),
   ];
+
+  const hasInvestments = activeInvestments.length > 0;
+
+  // Real data for chart (if investments exist, we'll plot current value)
+  const performanceChartData = hasInvestments ? [
+    { month: "Start", balance: totalBalance - totalEarned },
+    { month: "Current", balance: totalBalance },
+  ] : [];
 
   return (
     <div className="space-y-6">
@@ -307,25 +310,38 @@ export default function DashboardOverview() {
             </Badge>
           </CardHeader>
           <CardContent className="pt-5">
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={performanceChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0F172A", borderColor: "#1E293B", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
-                    formatter={(val: any) => [`$${Number(val).toLocaleString()}`, "Balance"]}
-                  />
-                  <Area type="monotone" dataKey="balance" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#colorBalance)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            {!hasInvestments ? (
+              <div className="h-64 w-full flex flex-col items-center justify-center text-center p-6 border border-dashed rounded-xl bg-muted/20">
+                <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-sm font-semibold text-foreground mb-1">Portfolio Performance</h3>
+                <p className="text-xs text-muted-foreground max-w-[250px] mb-4">
+                  Performance data will appear here after your first investment.
+                </p>
+                <Button size="sm" asChild variant="outline">
+                  <Link to="/dashboard/investments">Explore Investments</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={performanceChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#0F172A", borderColor: "#1E293B", borderRadius: "8px", color: "#fff", fontSize: "12px" }}
+                      formatter={(val: any) => [`$${Number(val).toLocaleString()}`, "Balance"]}
+                    />
+                    <Area type="monotone" dataKey="balance" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#colorBalance)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -340,41 +356,51 @@ export default function DashboardOverview() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4 flex-1 flex flex-col justify-between space-y-4">
-            <div className="h-44 w-full flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={allocationData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {allocationData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={ALLOCATION_COLORS[index % ALLOCATION_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: "#0F172A", borderRadius: "8px", color: "#fff", fontSize: "12px" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {!hasInvestments ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-6 border border-dashed rounded-xl bg-muted/20">
+                <PieIcon className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                <p className="text-xs text-muted-foreground max-w-[200px]">
+                  No active assets allocated. Start investing to build your portfolio.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="h-44 w-full flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={allocationData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={45}
+                        outerRadius={70}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {allocationData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={ALLOCATION_COLORS[index % ALLOCATION_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: "#0F172A", borderRadius: "8px", color: "#fff", fontSize: "12px" }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
 
-            <div className="space-y-2 pt-2 border-t text-xs">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-blue-600" /> Forex</span>
-                <span className="font-semibold text-foreground">40%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Cryptocurrency</span>
-                <span className="font-semibold text-foreground">35%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Commodities</span>
-                <span className="font-semibold text-foreground">25%</span>
-              </div>
-            </div>
+                <div className="space-y-2 pt-2 border-t text-xs">
+                  {allocationData.map((data, idx) => (
+                    <div key={data.name} className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ALLOCATION_COLORS[idx % ALLOCATION_COLORS.length] }} /> 
+                        {data.name}
+                      </span>
+                      <span className="font-semibold text-foreground">
+                        {((data.value / totalInvested) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

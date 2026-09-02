@@ -146,14 +146,16 @@ export default function Portfolio() {
                 ))}
               </div>
             ) : portfolioItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed rounded-lg bg-muted/20">
-                <PieChart className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                <h3 className="text-base font-semibold mb-1">No Active Investments</h3>
-                <p className="text-sm text-muted-foreground max-w-[250px] mb-4">
-                  You need active investments to see your portfolio allocation.
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/dashboard/investments">Explore Plans</Link>
+              <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed rounded-xl bg-muted/10 px-4">
+                <PieChart className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-heading font-bold text-foreground mb-2">Your portfolio starts here</h3>
+                <div className="text-sm text-muted-foreground mb-6 max-w-sm space-y-1 text-left bg-background p-4 rounded-lg border shadow-sm">
+                  <div className="flex items-center gap-2"><div className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div> <span>Fund your account</span></div>
+                  <div className="flex items-center gap-2"><div className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div> <span>Choose an investment</span></div>
+                  <div className="flex items-center gap-2"><div className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div> <span>Track your performance</span></div>
+                </div>
+                <Button size="lg" asChild className="font-semibold shadow-sm">
+                  <Link to="/dashboard/investments">Start Investing</Link>
                 </Button>
               </div>
             ) : (

@@ -222,15 +222,15 @@ export default function DashboardCopyTrading() {
             <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Users className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No Active Traders</h3>
-            <p className="text-muted-foreground max-w-sm mb-6">
-              You aren't copying anyone right now. Browse our marketplace of elite traders to get started.
+            <h3 className="text-lg font-heading font-bold mb-2">No Active Traders</h3>
+            <p className="text-muted-foreground max-w-sm mb-6 text-sm">
+              You are not currently copying any trading strategies. Select a verified trader below to get started.
             </p>
             <Button onClick={() => {
               const element = document.getElementById('discover-traders');
               element?.scrollIntoView({ behavior: 'smooth' });
             }}>
-              Discover Traders
+              View Traders
             </Button>
           </CardContent>
         </Card>
@@ -239,8 +239,8 @@ export default function DashboardCopyTrading() {
       {/* Trader Marketplace */}
       <div id="discover-traders" className="space-y-6 pt-4">
         <div>
-          <h2 className="text-xl font-semibold font-heading">Discover Expert Traders</h2>
-          <p className="text-sm text-muted-foreground mt-1">Review historical performance and choose a trader that matches your risk profile.</p>
+          <h2 className="text-xl font-heading font-bold">Discover Verified Traders</h2>
+          <p className="text-sm text-muted-foreground mt-1">Review verified performance metrics and select a strategy that aligns with your targets.</p>
         </div>
         
         <Tabs defaultValue="all" className="w-full">
@@ -280,7 +280,7 @@ export default function DashboardCopyTrading() {
                                 <div className="relative">
                                   <img src={t.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + t.name} alt={t.name} className="w-12 h-12 rounded-full object-cover border" loading="lazy" />
                                   {isElite && (
-                                    <div className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-0.5 rounded-full ring-2 ring-background" title="Elite Trader">
+                                    <div className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-0.5 rounded-full ring-2 ring-background" title="High Win Rate">
                                       <TrendingUp className="h-3 w-3" />
                                     </div>
                                   )}

@@ -137,8 +137,19 @@ export default function Transactions() {
                   ))
                 ) : filteredTransactions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                      No transactions found matching your criteria.
+                    <TableCell colSpan={5} className="h-64 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2">
+                          <FileText className="h-6 w-6 text-muted-foreground/50" />
+                        </div>
+                        <h3 className="font-heading font-bold text-lg">No Transactions Yet</h3>
+                        <p className="text-sm text-muted-foreground max-w-sm">
+                          Your deposits, withdrawals, and investment transactions will appear here once you begin using your account.
+                        </p>
+                        <Button variant="outline" size="sm" asChild className="mt-4">
+                          <a href="/dashboard/deposit">Make Your First Deposit</a>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (

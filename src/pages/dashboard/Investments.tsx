@@ -215,12 +215,12 @@ export default function Investments() {
                 <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Briefcase className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No Active Investments</h3>
+                <h3 className="text-lg font-heading font-bold mb-2">No Active Investments</h3>
                 <p className="text-sm text-muted-foreground max-w-sm mb-6">
-                  You don't have any active investment plans yet. Browse available plans to get started.
+                  You haven't started an investment yet. Explore the available opportunities and choose one that matches your goals.
                 </p>
                 <Button onClick={() => document.querySelector<HTMLButtonElement>('[value="available"]')?.click()}>
-                  Browse Plans
+                  Explore Investments
                 </Button>
               </CardContent>
             </Card>

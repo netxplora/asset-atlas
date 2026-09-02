@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PublicLayout } from "@/components/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useInvestmentPlans } from "@/hooks/useSupabaseData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,24 +20,24 @@ import heroCrypto from "@/assets/hero-crypto.jpg";
 import heroCommodities from "@/assets/hero-commodities.jpg";
 import heroPlans from "@/assets/hero-main.jpg";
 
-const plans = {
+const defaultPlans: Record<string, any[]> = {
   forex: [
-    { tier: "Starter", min: "$100", rawMin: 100, roi: "8%", rawRoi: 8, duration: "30 Days", risk: "Low", recommended: "New investors beginning in currency markets" },
-    { tier: "Silver", min: "$1,000", rawMin: 1000, roi: "12%", rawRoi: 12, duration: "60 Days", risk: "Medium", recommended: "Intermediate investors seeking capital growth" },
-    { tier: "Gold", min: "$5,000", rawMin: 5000, roi: "18%", rawRoi: 18, duration: "90 Days", risk: "Medium", recommended: "Experienced investors with larger allocations" },
-    { tier: "Elite", min: "$25,000", rawMin: 25000, roi: "25%", rawRoi: 25, duration: "180 Days", risk: "High", recommended: "High-net-worth long-term strategies" },
+    { tier: "Forex Starter", min: "$100", rawMin: 100, roi: "8%", rawRoi: 8, duration: "30 Days", risk: "Low", recommended: "Entry-level Forex plan for new investors in currency markets." },
+    { tier: "Forex Silver", min: "$1,000", rawMin: 1000, roi: "12%", rawRoi: 12, duration: "60 Days", risk: "Medium", recommended: "Intermediate Forex plan for consistent capital growth." },
+    { tier: "Forex Gold", min: "$5,000", rawMin: 5000, roi: "18%", rawRoi: 18, duration: "90 Days", risk: "Medium", recommended: "Advanced Forex allocation for experienced currency investors." },
+    { tier: "Forex Elite", min: "$25,000", rawMin: 25000, roi: "25%", rawRoi: 25, duration: "180 Days", risk: "High", recommended: "High-net-worth long-term Forex strategy with maximum exposure." },
   ],
   crypto: [
-    { tier: "Starter", min: "$250", rawMin: 250, roi: "10%", rawRoi: 10, duration: "30 Days", risk: "Medium", recommended: "New digital asset investors" },
-    { tier: "Silver", min: "$2,500", rawMin: 2500, roi: "15%", rawRoi: 15, duration: "60 Days", risk: "Medium", recommended: "Investors comfortable with market movements" },
-    { tier: "Gold", min: "$10,000", rawMin: 10000, roi: "22%", rawRoi: 22, duration: "90 Days", risk: "High", recommended: "Experienced digital currency investors" },
-    { tier: "Elite", min: "$50,000", rawMin: 50000, roi: "30%", rawRoi: 30, duration: "180 Days", risk: "High", recommended: "Institutional-scale crypto strategies" },
+    { tier: "Crypto Starter", min: "$250", rawMin: 250, roi: "10%", rawRoi: 10, duration: "30 Days", risk: "Medium", recommended: "Entry point into digital asset markets with managed exposure." },
+    { tier: "Crypto Silver", min: "$2,500", rawMin: 2500, roi: "15%", rawRoi: 15, duration: "60 Days", risk: "Medium", recommended: "Balanced crypto allocation across top-cap digital assets." },
+    { tier: "Crypto Gold", min: "$10,000", rawMin: 10000, roi: "22%", rawRoi: 22, duration: "90 Days", risk: "High", recommended: "High-yield crypto strategy for experienced digital asset investors." },
+    { tier: "Crypto Elite", min: "$50,000", rawMin: 50000, roi: "30%", rawRoi: 30, duration: "180 Days", risk: "High", recommended: "Institutional-scale crypto allocation with active portfolio management." },
   ],
   commodities: [
-    { tier: "Starter", min: "$500", rawMin: 500, roi: "6%", rawRoi: 6, duration: "30 Days", risk: "Low", recommended: "Conservative investors seeking stability" },
-    { tier: "Silver", min: "$3,000", rawMin: 3000, roi: "10%", rawRoi: 10, duration: "60 Days", risk: "Low", recommended: "Long-term portfolio diversification" },
-    { tier: "Gold", min: "$15,000", rawMin: 15000, roi: "15%", rawRoi: 15, duration: "90 Days", risk: "Medium", recommended: "Balanced physical asset allocations" },
-    { tier: "Elite", min: "$75,000", rawMin: 75000, roi: "20%", rawRoi: 20, duration: "180 Days", risk: "Medium", recommended: "High-net-worth commodity investors" },
+    { tier: "Commodities Starter", min: "$500", rawMin: 500, roi: "6%", rawRoi: 6, duration: "30 Days", risk: "Low", recommended: "Conservative commodities plan ideal for capital preservation." },
+    { tier: "Commodities Silver", min: "$3,000", rawMin: 3000, roi: "10%", rawRoi: 10, duration: "60 Days", risk: "Low", recommended: "Diversified physical asset allocation for long-term portfolio growth." },
+    { tier: "Commodities Gold", min: "$15,000", rawMin: 15000, roi: "15%", rawRoi: 15, duration: "90 Days", risk: "Medium", recommended: "Balanced precious metals and energy commodities strategy." },
+    { tier: "Commodities Elite", min: "$75,000", rawMin: 75000, roi: "20%", rawRoi: 20, duration: "180 Days", risk: "Medium", recommended: "High-net-worth commodities portfolio with dedicated allocation." },
   ],
 };
 
@@ -48,19 +49,86 @@ const categoryLabels: Record<string, string> = {
 
 export default function Plans() {
   const { user } = useAuth();
+  const { data: dbPlans, isLoading } = useInvestmentPlans();
+  
   const [calcAmount, setCalcAmount] = useState<string>("2500");
   const [calcCategory, setCalcCategory] = useState<"forex" | "crypto" | "commodities">("forex");
   const [calcPlanIdx, setCalcPlanIdx] = useState<string>("1");
 
+  // Map DB plans to display shape, grouped by their category column
+  const mappedDbPlans = useMemo(() => {
+    if (!dbPlans || dbPlans.length === 0) return null;
+    return dbPlans
+      .filter(p => p.is_active)
+      .sort((a, b) => Number(a.min_amount) - Number(b.min_amount));
+  }, [dbPlans]);
+
+  const plans = useMemo(() => {
+    if (!mappedDbPlans) return defaultPlans;
+
+    const toDisplay = (p: typeof mappedDbPlans[0]) => ({
+      id: p.id,
+      tier: p.name,
+      min: `$${Number(p.min_amount).toLocaleString()}`,
+      rawMin: Number(p.min_amount),
+      roi: `${p.roi_percentage}%`,
+      rawRoi: Number(p.roi_percentage),
+      duration: `${p.duration_days} Days`,
+      risk: (p.roi_percentage > 50 ? "High" : p.roi_percentage > 15 ? "Medium" : "Low") as string,
+      recommended: p.description || "",
+    });
+
+    // Group by the category column — "Forex" → forex tab, etc.
+    const forex = mappedDbPlans.filter(p => p.category === "Forex").map(toDisplay);
+    const crypto = mappedDbPlans.filter(p => p.category === "Crypto").map(toDisplay);
+    const commodities = mappedDbPlans.filter(p => p.category === "Commodities").map(toDisplay);
+
+    return {
+      forex: forex.length > 0 ? forex : defaultPlans.forex,
+      crypto: crypto.length > 0 ? crypto : defaultPlans.crypto,
+      commodities: commodities.length > 0 ? commodities : defaultPlans.commodities,
+    };
+  }, [mappedDbPlans]);
+
+  // Featured plan: prefer any plan with "gold" in name, else second-to-last
+  const featuredTierName = useMemo(() => {
+    const list = plans.forex;
+    if (!list || list.length === 0) return "Gold";
+    const goldPlan = list.find(p => p.tier.toLowerCase().includes("gold"));
+    if (goldPlan) return goldPlan.tier;
+    return list[Math.max(list.length - 2, 0)].tier;
+  }, [plans.forex]);
+
   const calcResult = useMemo(() => {
     const amount = parseFloat(calcAmount) || 0;
-    const planList = plans[calcCategory];
+    const planList = plans[calcCategory] || [];
     const plan = planList[parseInt(calcPlanIdx)] || planList[0];
+    if (!plan) return { profit: 0, total: amount, plan: defaultPlans.forex[0] };
     const roiPercent = plan.rawRoi;
     const profit = amount * (roiPercent / 100);
     const total = amount + profit;
     return { profit, total, plan };
-  }, [calcAmount, calcCategory, calcPlanIdx]);
+  }, [calcAmount, calcCategory, calcPlanIdx, plans]);
+
+  // Reset plan index when category changes to avoid out-of-bounds
+  const handleCategoryChange = (v: "forex" | "crypto" | "commodities") => {
+    setCalcCategory(v);
+    setCalcPlanIdx("1");
+  };
+
+  // Skeleton card for loading state
+  const SkeletonCard = () => (
+    <div className="rounded-2xl border border-border bg-card p-6 space-y-4 animate-pulse">
+      <div className="h-4 w-24 rounded bg-muted" />
+      <div className="h-8 w-20 rounded bg-muted" />
+      <div className="border-t border-border pt-3 space-y-2">
+        <div className="h-3 w-full rounded bg-muted" />
+        <div className="h-3 w-5/6 rounded bg-muted" />
+        <div className="h-3 w-4/6 rounded bg-muted" />
+      </div>
+      <div className="h-9 w-full rounded bg-muted" />
+    </div>
+  );
 
   const targetLink = user ? "/dashboard/investments" : "/register";
 
@@ -113,10 +181,7 @@ export default function Plans() {
                     <Label className="text-xs font-semibold text-foreground">Asset Class</Label>
                     <Select
                       value={calcCategory}
-                      onValueChange={(v: any) => {
-                        setCalcCategory(v);
-                        setCalcPlanIdx("0");
-                      }}
+                      onValueChange={(v) => handleCategoryChange(v as "forex" | "crypto" | "commodities")}
                     >
                       <SelectTrigger className="h-11 text-sm bg-background">
                         <SelectValue placeholder="Select Asset Class" />
@@ -137,7 +202,7 @@ export default function Plans() {
                       </SelectTrigger>
                       <SelectContent>
                         {plans[calcCategory].map((p, idx) => (
-                          <SelectItem key={p.tier} value={idx.toString()}>
+                          <SelectItem key={`${calcCategory}-${idx}-${p.tier}`} value={idx.toString()}>
                             {p.tier} Tier — {p.roi} ({p.duration})
                           </SelectItem>
                         ))}
@@ -205,14 +270,24 @@ export default function Plans() {
             </div>
 
             {Object.entries(plans).map(([key, list]) => (
-              <TabsContent key={key} value={key} className="space-y-12">
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
+              <TabsContent
+                key={key}
+                value={key}
+                className="space-y-12 data-[state=inactive]:hidden"
+                forceMount
+              >
+                {isLoading ? (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map(n => <SkeletonCard key={n} />)}
+                  </div>
+                ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {list.map((p, i) => {
-                    const isFeatured = p.tier === "Gold";
+                    const isFeatured = p.tier === featuredTierName;
                     return (
                       <Card
-                        key={p.tier}
-                        className={`relative flex flex-col justify-between transition-all duration-300 reveal glass-card card-hover overflow-hidden ${
+                        key={`${key}-${i}-${p.tier}`}
+                        className={`relative flex flex-col justify-between transition-all duration-300 glass-card card-hover overflow-hidden ${
                           isFeatured ? "border-primary ring-2 ring-primary/20" : ""
                         }`}
                       >
@@ -273,6 +348,7 @@ export default function Plans() {
                     );
                   })}
                 </div>
+                )}
 
                 {/* Plan Comparison Matrix */}
                 <div className="bg-card rounded-xl border border-border shadow-elevation-sm overflow-hidden">

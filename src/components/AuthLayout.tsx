@@ -20,9 +20,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <img
           src={heroMain}
           alt="AssetVault digital asset management"
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
+          className="absolute inset-0 w-full h-full object-cover opacity-55"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-slate-950/20" />
 
         {/* Logo */}
         <div className="relative z-10">
